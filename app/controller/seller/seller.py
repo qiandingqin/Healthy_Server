@@ -32,7 +32,6 @@ def logout():
       {
 
       }
-    :return:
     """
 
 @model.route("/my_clients/",methods=['POST'])
@@ -51,7 +50,6 @@ def my_clients():
                 "is_report" : Long #最新食谱发布时间，根据时间判断商家是否配餐
             ]
        }
-    :return:
     """
 
 
@@ -67,7 +65,6 @@ def recipes():
       @apiSuccessExample {json} JSON.result 对象
       {
       }
-    :return:
     """
 
 @model.route("/apply_clients/",methods=['POST'])
@@ -86,7 +83,6 @@ def apply_clients():
            "phone": String #联系方式
         }]
       }
-    :return:
     """
 
 @model.route("/apply_clients_info/<string:user_id>/",methods=['POST'])
@@ -112,7 +108,6 @@ def apply_clients_info(user_id):
          "sport" : String # 运动
          "assessment" : String # 当前评估
        }
-    :return:
     """
 
 
@@ -128,7 +123,6 @@ def create_apply(user_id):
       @apiSuccessExample {json} JSON.result 对象
       {
       }
-    :return:
     """
 
 @model.route('/user_recipes/<string:user_id>/')
@@ -150,28 +144,26 @@ def user_recipes(user_id):
             }
          ]
        }
-    :return:
     """
 
 @model.route('/dietetic_daily/<string:user_id>/')
 def dietetic_daily(user_id):
     """
-     * @api {GET} /seller/dietetic_daily/<user_id>/ 09. 获取用户饮食日报列表
-     * @apiGroup S_商家_Seller
-     * @apiVersion 1.0.0
-     * @apiPermission 访问授权
-     * @apiParam {str} user_id 用户ID
-     * @apiParam {str} next_start 分页起始ID 默认值: null
-     * @apiSuccessExample {json} JSON.result 对象
-     * {
-     *   dietetic_daily:[
-     *      {
-     *          id: String # 饮食日报ID
-     *          timed : Long 时间
-     *      }
-     *   ]
-     * }
-    :return:
+       @api {GET} /seller/dietetic_daily/<user_id>/ 09. 获取用户饮食日报列表
+       @apiGroup S_商家_Seller
+       @apiVersion 1.0.0
+       @apiPermission 访问授权
+       @apiParam {str} user_id 用户ID
+       @apiParam {str} next_start 分页起始ID 默认值: null
+       @apiSuccessExample {json} JSON.result 对象
+       {
+         dietetic_daily:[
+            {
+                id: String # 饮食日报ID
+                timed : Long 时间
+            }
+         ]
+       }
     """
 
 @model.route('/comprehensive_daily/<string:user_id>/')
@@ -195,5 +187,4 @@ def comprehensive_daily(user_id):
              }]
              "timed": Long # 创建时间
        }
-    :return:
     """
