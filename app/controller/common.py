@@ -4,6 +4,8 @@
 from flask import Blueprint, request, g, render_template, session, redirect, url_for
 from conf.config import appID,appsecret
 import requests, time, json, hashlib
+from flask import jsonify, json, request, current_app, make_response
+import datetime, time
 
 def ticket():
     get_token = requests.get("https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid="+appID+"&secret="+appsecret)
@@ -25,3 +27,22 @@ def ticket():
     encode_json = json.dumps(dict_str)
     return encode_json
 
+def timestamp(date=None):
+    if date is None:
+        date = datetime.datetime.now()
+    t = time.mktime(date.timetuple())
+    return long(t)
+
+
+def apiresult(obj=None, code=0, **kwargs):
+    t = timestamp()
+    result = isinstance(obj, dict) and obj or {}
+    for k in kwargs:
+        result[k] = kwargs[k]
+    return jsonify(code=code, timestamp=t, result=result)
+
+
+def abort(code, msg=None):
+    if code == 10000 and not msg:
+        msg = '请求的参数错误'
+    # raise ApiException(code, msg)

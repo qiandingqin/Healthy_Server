@@ -1,9 +1,12 @@
 # coding=utf-8
 # -*- coding: utf-8 -*-
-from flask import Blueprint
+from flask import Blueprint, request, session, render_template
+from conf.config import users
+import json
+from api import abort, apiresult
 model = Blueprint('seller', __name__)
 
-@model.route("/seller/my_clients/",methods=['POST'])
+@model.route("/seller/my_clients/",methods=['post'])
 def my_clients():
     """
        @api {POST} /seller/my_clients/ 03. 获取我的客户列表
@@ -20,7 +23,29 @@ def my_clients():
             ]
        }
     """
+    members = users.find({'type':0,"apply_status":1})
+    data = []
+    for mem in members:
+        member = {}
+        member['_id'] = mem['_id']
+        member['name'] = mem['name']
+        data.append(member)
+    json_str = json.dumps(data)
+    json_data = json.loads(json_str)
 
+    # data=[]
+    # for i in range(5):
+    #     tmp = {}
+    #     tmp['sex'] = 'boy_%s' % i
+    #     tmp['declare'] = 'apple_%s' % i
+    #     data.append(tmp)
+    # json_str = json.dumps(data)
+    # print type(json_str)
+    # #解析json
+    # json_data = json.loads(json_str)
+    # print json_data[1]['sex']
+
+    return apiresult(json_data)
 
 
 @model.route("/seller/recipes/<string:user_id>/",methods=['POST'])
@@ -115,6 +140,7 @@ def user_recipes(user_id):
          ]
        }
     """
+    return "123"
 
 @model.route('/seller/sell_dietetic_daily/<string:user_id>/')
 def sell_dietetic_daily(user_id):
