@@ -47,8 +47,8 @@ def today_recipes():
     :return:
     """
 
-@model.route("/dietetic_daily/")
-def dietetic_daily():
+@model.route("/dietetic_dailys/")
+def dietetic_dailys():
     """
      * @api {GET} /user/dietetic_daily/ 03. 我的-饮食日报列表
      * @apiGroup U_用户_USER
@@ -84,8 +84,8 @@ def dietetic_daily():
     :return:
     """
 
-@model.route("/get/dietetic_daily/<string:diet_id>/")
-def dietetic_daily(diet_id):
+@model.route("/get/dietetic_daily_info/<string:diet_id>/")
+def dietetic_daily_info(diet_id):
     """
        @api {GET} /user/get/dietetic_daily/<diet_id>/ 05. 我的-发布饮食日报详细信息
        @apiGroup U_用户_USER
@@ -157,7 +157,7 @@ def comprehensive_info(comprehensive_id):
     :return:
     """
 
-@model.route('/obesity_test/',mthods=['post'])
+@model.route('/obesity_test/',methods=['post'])
 def obesity_test():
     """
      * @api {POST} /user/obesity_test/ 08. 肥胖测试
