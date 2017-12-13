@@ -3,7 +3,7 @@
 from flask import Blueprint, request, session, g, render_template
 model = Blueprint('user', __name__)
 
-@model.route("/oauth/<string:open_id>/",methods=['post'])
+@model.route("/user/oauth/<string:open_id>/",methods=['post'])
 def oauth(open_id):
     """
        @api {POST} /user/oauth/<open_id>/ 01. 用户-第三方账号登录
@@ -25,7 +25,7 @@ def oauth(open_id):
        }
       """
 
-@model.route("/today_recipes/")
+@model.route("/user/today_recipes/")
 def today_recipes():
     """
        @api {GET} /user/today_recipes/ 02. 我的-食谱列表
@@ -45,7 +45,7 @@ def today_recipes():
        }
     """
 
-@model.route("/dietetic_daily_list/")
+@model.route("/user/dietetic_daily_list/")
 def dietetic_daily_list():
     """
        @api {GET} /user/dietetic_daily_list/ 03. 我的-饮食日报列表
@@ -65,7 +65,7 @@ def dietetic_daily_list():
     """
 
 
-@model.route("/create/dietetic_daily/",methods=['post'])
+@model.route("/user/create/dietetic_daily/",methods=['post'])
 def dietetic_daily():
     """
        @api {POST} /user/create/dietetic_daily/ 04. 用户发布饮食日报信息
@@ -80,10 +80,10 @@ def dietetic_daily():
        }
     """
 
-@model.route("/get/dietetic_daily_info/<string:diet_id>/")
+@model.route("/user/get/dietetic_daily_info/<string:diet_id>/")
 def dietetic_daily_info(diet_id):
     """
-       @api {GET} /user/get/dietetic_daily/<diet_id>/ 05. 我的-发布饮食日报详细信息
+       @api {GET} /user/get/dietetic_daily_info/<diet_id>/ 05. 我的-发布饮食日报详细信息
        @apiGroup U_用户_USER
        @apiVersion 1.0.0
        @apiPermission 访问授权
@@ -105,10 +105,10 @@ def dietetic_daily_info(diet_id):
        }
     """
 
-@model.route("/get/comprehensive_daily/")
-def comprehensive_daily():
+@model.route("/user/get/user_comprehensive_daily/")
+def user_comprehensive_daily():
     """
-       @api {GET} /user/get/comprehensive_daily/ 06. 我的-获取综合日报列表信息
+       @api {GET} /user/get/user_comprehensive_daily/ 06. 我的-获取综合日报列表信息
        @apiGroup U_用户_USER
        @apiVersion 1.0.0
        @apiPermission 访问授权
@@ -119,7 +119,7 @@ def comprehensive_daily():
             "arrange_weight" : Double # 变化体重 [单位：kg]
             "today_weight" : Double # 今日体重 [单位：kg]
              "comprehensive" : [{
-                "today_weight": Double # 今日体重
+                "weight": Double # 今日体重
                 "arrange_weight" : Double # 变化体重 [单位：kg]
                 "timed": Long # 创建时间
              }]
@@ -129,10 +129,10 @@ def comprehensive_daily():
     return  "sdfasdf"
 
 
-@model.route('/get/comprehensive_info/<string:comprehensive_id>/')
-def comprehensive_info(comprehensive_id):
+@model.route('/user/get/user_comprehensive_info/<string:comprehensive_id>/')
+def user_comprehensive_info(comprehensive_id):
     """
-        @api {GET} /user/get/comprehensive_info/<comprehensive_id>/ 07. 获取综合日报详细信息
+        @api {GET} /user/get/user_comprehensive_info/<comprehensive_id>/ 07. 获取综合日报详细信息
         @apiGroup U_用户_USER
         @apiVersion 1.0.0
         @apiPermission 访问授权
@@ -151,7 +151,7 @@ def comprehensive_info(comprehensive_id):
         }
     """
 
-@model.route('/obesity_test/',methods=['post'])
+@model.route('/user/obesity_test/',methods=['post'])
 def obesity_test():
     """
        @api {POST} /user/obesity_test/ 08. 肥胖测试
@@ -169,7 +169,7 @@ def obesity_test():
        }
     """
 
-@model.route('/apply_free_consultation/',methods=['post'])
+@model.route('/user/apply_free_consultation/',methods=['post'])
 def apply_free_consultation():
     """
        @api {POST} /user/apply_free_consultation/ 09. 申请免费咨询
@@ -186,7 +186,7 @@ def apply_free_consultation():
        }
     """
 
-@model.route('/files_upload/',methods=['post'])
+@model.route('/user/files_upload/',methods=['post'])
 def files_upload():
     """
        @api {POST} /user/files_upload/ 10. 文件上传接口

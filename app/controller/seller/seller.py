@@ -3,38 +3,7 @@
 from flask import Blueprint
 model = Blueprint('seller', __name__)
 
-@model.route("/login/",methods=['POST'])
-def login():
-    """
-      @api {POST} /seller/login/ 01. 商家-登录
-      @apiGroup S_商家_Seller
-      @apiVersion 1.0.0
-
-      @apiPermission 访问授权
-
-      @apiParam {str} account 手机号码
-      @apiParam {str} [password] 密码
-      @apiSuccessExample {json} JSON.result 对象
-      {
-
-      }
-    """
-
-@model.route("/mine/logout/",methods=['POST'])
-def logout():
-    """
-      @api {POST} /seller/mine/logout/ 02. 商家-退出登录
-      @apiGroup S_商家_Seller
-      @apiVersion 1.0.0
-
-      @apiPermission 用户登录
-      @apiSuccessExample {json} JSON.result 对象
-      {
-
-      }
-    """
-
-@model.route("/my_clients/",methods=['POST'])
+@model.route("/seller/my_clients/",methods=['POST'])
 def my_clients():
     """
        @api {POST} /seller/my_clients/ 03. 获取我的客户列表
@@ -53,7 +22,8 @@ def my_clients():
     """
 
 
-@model.route("/recipes/<string:user_id>/",methods=['POST'])
+
+@model.route("/seller/recipes/<string:user_id>/",methods=['POST'])
 def recipes():
     """
       @api {POST} /seller/recipes/<user_id>/ 04. 商家发布对应会员的食谱
@@ -67,7 +37,7 @@ def recipes():
       }
     """
 
-@model.route("/apply_clients/",methods=['POST'])
+@model.route("/seller/apply_clients/",methods=['POST'])
 def apply_clients():
     """
       @api {POST} /seller/apply_clients/ 05. 获取我的申请用户列表
@@ -85,7 +55,7 @@ def apply_clients():
       }
     """
 
-@model.route("/apply_clients_info/<string:user_id>/",methods=['POST'])
+@model.route("/seller/apply_clients_info/<string:user_id>/",methods=['POST'])
 def apply_clients_info(user_id):
     """
        @api {POST} /seller/apply_clients_info/<user_id>/ 06. 获取用户详细信息
@@ -111,7 +81,7 @@ def apply_clients_info(user_id):
     """
 
 
-@model.route('/create_apply/<string:user_id>/',methods=['POST'])
+@model.route('/seller/create_apply/<string:user_id>/',methods=['POST'])
 def create_apply(user_id):
     """
       @api {POST} /seller/create_apply/<user_id>/ 07. 操作用户申请
@@ -125,7 +95,7 @@ def create_apply(user_id):
       }
     """
 
-@model.route('/user_recipes/<string:user_id>/')
+@model.route('/seller/user_recipes/<string:user_id>/')
 def user_recipes(user_id):
     """
        @api {GET} /seller/user_recipes/<user_id>/ 08. 获取用户食谱列表
@@ -146,10 +116,10 @@ def user_recipes(user_id):
        }
     """
 
-@model.route('/dietetic_daily/<string:user_id>/')
-def dietetic_daily(user_id):
+@model.route('/seller/sell_dietetic_daily/<string:user_id>/')
+def sell_dietetic_daily(user_id):
     """
-       @api {GET} /seller/dietetic_daily/<user_id>/ 09. 获取用户饮食日报列表
+       @api {GET} /seller/sell_dietetic_daily/<user_id>/ 09. 获取用户饮食日报列表
        @apiGroup S_商家_Seller
        @apiVersion 1.0.0
        @apiPermission 访问授权
@@ -166,10 +136,10 @@ def dietetic_daily(user_id):
        }
     """
 
-@model.route('/comprehensive_daily/<string:user_id>/')
-def comprehensive_daily(user_id):
+@model.route('/seller/sell_comprehensive_daily/<string:user_id>/')
+def sell_comprehensive_daily(user_id):
     """
-       @api {GET} /seller/comprehensive_daily/<user_id>/ 10. 获取用户综合日报列表信息
+       @api {GET} /seller/sell_comprehensive_daily/<user_id>/ 10. 获取用户综合日报列表信息
        @apiGroup U_用户_USER
        @apiVersion 1.0.0
        @apiPermission 访问授权
@@ -181,7 +151,7 @@ def comprehensive_daily(user_id):
             "arrange_weight" : Double # 变化体重 [单位：kg]
             "today_weight" : Double # 今日体重 [单位：kg]
              "comprehensive" : [{
-                "today_weight": Double # 今日体重
+                "weight": Double # 今日体重
                 "arrange_weight" : Double # 变化体重 [单位：kg]
                 "timed": Long # 创建时间
              }]
