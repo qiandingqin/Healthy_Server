@@ -1,6 +1,6 @@
 # coding=utf-8
 # -*- coding: utf-8 -*-
-from flask import Blueprint
+from flask import Blueprint, request, session, render_template
 model = Blueprint('seller', __name__)
 
 @model.route("/seller/my_clients/",methods=['POST'])
@@ -20,7 +20,7 @@ def my_clients():
             ]
        }
     """
-
+    return "asdfasdfasdfasdf"
 
 
 @model.route("/seller/recipes/<string:user_id>/",methods=['POST'])
@@ -115,6 +115,7 @@ def user_recipes(user_id):
          ]
        }
     """
+    return "123"
 
 @model.route('/seller/sell_dietetic_daily/<string:user_id>/')
 def sell_dietetic_daily(user_id):
