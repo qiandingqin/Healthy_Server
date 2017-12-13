@@ -6,6 +6,7 @@ model = Blueprint('user', __name__)
 #客户端用户列表
 @model.route("/user_list")
 def user_list():
+    水电费水电费
     return "qqqq"
 
 #客户端用户订单列表
