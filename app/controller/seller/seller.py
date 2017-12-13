@@ -2,17 +2,19 @@
 # -*- coding: utf-8 -*-
 from flask import Blueprint, request, session, render_template,jsonify,json
 from conf.config import users,recipes,DB
-from app.controller.common import apiresult,timestamp
+from app.controller.common import apiresult,timestamp,item_count,next_start
 import bson
+from bson.json_util import dumps
 
 model = Blueprint('seller', __name__)
 
-@model.route("/seller/my_clients/",methods=['post'])
+@model.route("/seller/my_clients/", methods= ['post'])
 def my_clients():
     """
        @api {POST} /seller/my_clients/ 03. 获取我的客户列表
        @apiGroup S_商家_Seller
        @apiVersion 1.0.0
+       @apiParam {int} next_start 分页起始ID 默认值: 0
        @apiPermission 访问授权
        @apiSuccessExample {json} JSON.result 对象
        {
@@ -24,7 +26,11 @@ def my_clients():
             ]
        }
     """
-    members = users.find({'type':0,"apply_status":2})
+    code = 0
+    try:
+        members = users.find({'type': 0, "apply_status": 1}).limit(item_count()).skip(next_start()).reverse("timed")
+    except enumerate:
+        code = -1
     data = []
     for mem in members:
         member = {}
@@ -34,10 +40,12 @@ def my_clients():
         member['is_report'] = mem['is_report']
         data.append(member)
 
-    return jsonify(users=data)
+    us = {"users": data}
+    # return jsonify(code=code,result=us,timestamp=timestamp())
+    return apiresult(us, code)
 
 
-@model.route("/seller/recipes/<string:user_id>/",methods=['post'])
+@model.route("/seller/recipes/<string:user_id>/", methods=['post'])
 def recipes(user_id):
     """
       @api {POST} /seller/recipes/<user_id>/ 04. 商家发布对应会员的食谱
@@ -50,23 +58,29 @@ def recipes(user_id):
       {
       }
     """
-    user = users.find_one({"_id":user_id,"type":0,"apply_status":2})
+    if not user_id:
+        return "请求参数错误"
+    user = users.find_one({"_id": user_id,"type": 0,"apply_status": 1})
     if not user:
         return "该用户不存在或还不是你的会员"
-    content = request.args.get('content')
+    content = request.form.get("content")
     recipe = {
         "_id": bson.objectid.ObjectId().__str__(),
         "user_id": user_id,
         "content": content,
         "timed": timestamp()
     }
-    DB.recipes.insert_one(recipe)
-    return jsonify(result=0)
+    code = 0
+    try:
+        DB.recipes.insert_one(recipe)
+    except:
+        code = -1
+    return apiresult(None, code)
 
-@model.route("/seller/apply_clients/",methods=['POST'])
+@model.route( "/seller/apply_clients/", methods = ['get'])
 def apply_clients():
     """
-      @api {POST} /seller/apply_clients/ 05. 获取我的申请用户列表
+      @api {get} /seller/apply_clients/ 05. 获取我的申请用户列表
       @apiGroup S_商家_Seller
       @apiVersion 1.0.0
       @apiPermission 访问授权
@@ -80,11 +94,26 @@ def apply_clients():
         }]
       }
     """
+    lists = []
+    code = 0
+    try:
+        list = users.find({"type": 0, "apply_status": 0}).limit(item_count()).skip(next_start()).reverse("timed")
+        for user in list:
+            us = {}
+            us['_id'] = user['_id']
+            us['name'] = user['name']
+            us['phone'] = user['phone']
+            lists.append(us)
+    except:
+        code = -1
+    data = {"apply_clients":lists}
+    return apiresult(data,code)
 
-@model.route("/seller/apply_clients_info/<string:user_id>/",methods=['POST'])
+
+@model.route("/seller/apply_clients_info/<string:user_id>/",methods=['get'])
 def apply_clients_info(user_id):
     """
-       @api {POST} /seller/apply_clients_info/<user_id>/ 06. 获取用户详细信息
+       @api {get} /seller/apply_clients_info/<user_id>/ 06. 获取用户详细信息
        @apiGroup S_商家_Seller
        @apiVersion 1.0.0
        @apiPermission 访问授权
@@ -105,6 +134,15 @@ def apply_clients_info(user_id):
          "assessment" : String # 当前评估
        }
     """
+    if not user_id:
+        return "请求参数错误"
+    data = {}
+    code = 0
+    try:
+        data = users.find_one({"_id": user_id})
+    except:
+        code = -1
+    return apiresult(data, code)
 
 
 @model.route('/seller/create_apply/<string:user_id>/',methods=['POST'])
@@ -120,6 +158,17 @@ def create_apply(user_id):
       {
       }
     """
+    if not user_id:
+        return "请求参数错误"
+    user = users.find_one({"_id":user_id});
+    code = 0
+    if not user:
+        return "该用户不存在"
+    try:
+        users.update_one({"_id":user_id,"apply_status":1})
+    except:
+        code = -1
+    apiresult(None,code)
 
 @model.route('/seller/user_recipes/<string:user_id>/')
 def user_recipes(user_id):
@@ -141,7 +190,23 @@ def user_recipes(user_id):
          ]
        }
     """
-    return "123"
+
+    if not user_id:
+        return "请求参数错误"
+    code = 0
+    lists = []
+    try:
+        lists = DB.recipes.find({"user_id",user_id}).limit(item_count()).skip(next_start()).reverse("timed")
+    except:
+        code = -1
+    list = []
+    for rec in lists:
+        reci = {}
+        reci['_id'] = rec['_id']
+        reci['content'] = rec['content']
+        reci['timed'] = rec['timed']
+        list.append(reci)
+    apiresult({"today_recipes":list},code)
 
 @model.route('/seller/sell_dietetic_daily/<string:user_id>/')
 def sell_dietetic_daily(user_id):
@@ -151,7 +216,7 @@ def sell_dietetic_daily(user_id):
        @apiVersion 1.0.0
        @apiPermission 访问授权
        @apiParam {str} user_id 用户ID
-       @apiParam {str} next_start 分页起始ID 默认值: null
+       @apiParam {int} next_start 分页起始ID 默认值: null
        @apiSuccessExample {json} JSON.result 对象
        {
          dietetic_daily:[
@@ -162,6 +227,22 @@ def sell_dietetic_daily(user_id):
          ]
        }
     """
+    if not user_id:
+        return "请求参数错误"
+    code = 0
+    lists = []
+    try:
+        lists = DB.dietetic_daily.find({"user_id",user_id}).limit(item_count()).skip(next_start()).reverse("timed")
+    except:
+        code = -1
+    list = []
+    for rec in lists:
+        reci = {}
+        reci['_id'] = rec['_id']
+        reci['timed'] = rec['timed']
+        list.append(reci)
+    apiresult({"dietetic_daily":list},code)
+
 
 @model.route('/seller/sell_comprehensive_daily/<string:user_id>/')
 def sell_comprehensive_daily(user_id):
@@ -175,13 +256,39 @@ def sell_comprehensive_daily(user_id):
        @apiSuccessExample {json} JSON.result 对象
        {
             "local_weight" : Double # 原始体重 [单位：kg]
-            "arrange_weight" : Double # 变化体重 [单位：kg]
+            "arrange_weight" : Double # 变化体重 [单位：kg，备注：结果小于0瘦了，大于0胖了]
             "today_weight" : Double # 今日体重 [单位：kg]
              "comprehensive" : [{
                 "weight": Double # 今日体重
                 "arrange_weight" : Double # 变化体重 [单位：kg]
                 "timed": Long # 创建时间
              }]
-             "timed": Long # 创建时间
        }
     """
+    if not user_id:
+        return "请求参数不能为空"
+    lists = []
+    code = 0
+    try:
+        list = DB.comprehensive_daily.find({"user_id": user_id}).limit(item_count()).skip(next_start()).reverse("timed")
+        user = users.find_one({"_id": user_id})
+        today_weight = {}
+        for comprehen in list:
+            today_weight['today_weight'] = user['weight']
+            com = {}
+            com['_id'] = comprehen['_id']
+            com['weight'] = comprehen['weight']
+            if comprehen['weight'] & user['weight']:
+                com['arrange_weight'] = comprehen['weight'] - user['weight']
+            else:
+                com['arrange_weight'] = 0
+            com['timed'] = comprehen['timed']
+            lists.append(com)
+        if user['weight'] & today_weight['today_weight']:
+            arrange_weight = today_weight['today_weight'] - user['weight']
+        else:
+            arrange_weight = 0
+        result = {"local_weight": user['weight'], "arrange_weight": arrange_weight, "today_weight": user['weight'], "comprehensive": lists}
+    except:
+        code = -1
+    return apiresult(result, code)
