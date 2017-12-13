@@ -1,9 +1,10 @@
 # coding=utf-8
 # -*- coding: utf-8 -*-
-from flask import Blueprint, request, session, render_template
-from conf.config import users
-import json
-from api import abort, apiresult
+from flask import Blueprint, request, session, render_template,jsonify,json
+from conf.config import users,recipes,DB
+from app.controller.common import apiresult,timestamp
+import bson
+
 model = Blueprint('seller', __name__)
 
 @model.route("/seller/my_clients/",methods=['post'])
@@ -23,33 +24,21 @@ def my_clients():
             ]
        }
     """
-    members = users.find({'type':0,"apply_status":1})
+    members = users.find({'type':0,"apply_status":2})
     data = []
     for mem in members:
         member = {}
         member['_id'] = mem['_id']
         member['name'] = mem['name']
+        member['diet_timed'] = mem['diet_timed']
+        member['is_report'] = mem['is_report']
         data.append(member)
-    json_str = json.dumps(data)
-    json_data = json.loads(json_str)
 
-    # data=[]
-    # for i in range(5):
-    #     tmp = {}
-    #     tmp['sex'] = 'boy_%s' % i
-    #     tmp['declare'] = 'apple_%s' % i
-    #     data.append(tmp)
-    # json_str = json.dumps(data)
-    # print type(json_str)
-    # #解析json
-    # json_data = json.loads(json_str)
-    # print json_data[1]['sex']
-
-    return apiresult(json_data)
+    return jsonify(users=data)
 
 
-@model.route("/seller/recipes/<string:user_id>/",methods=['POST'])
-def recipes():
+@model.route("/seller/recipes/<string:user_id>/",methods=['post'])
+def recipes(user_id):
     """
       @api {POST} /seller/recipes/<user_id>/ 04. 商家发布对应会员的食谱
       @apiGroup S_商家_Seller
@@ -61,6 +50,18 @@ def recipes():
       {
       }
     """
+    user = users.find_one({"_id":user_id,"type":0,"apply_status":2})
+    if not user:
+        return "该用户不存在或还不是你的会员"
+    content = request.args.get('content')
+    recipe = {
+        "_id": bson.objectid.ObjectId().__str__(),
+        "user_id": user_id,
+        "content": content,
+        "timed": timestamp()
+    }
+    DB.recipes.insert_one(recipe)
+    return jsonify(result=0)
 
 @model.route("/seller/apply_clients/",methods=['POST'])
 def apply_clients():
