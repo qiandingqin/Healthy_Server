@@ -1,0 +1,21 @@
+{
+  "name": "健康管理系统(health) 手机移动网页端接口文档",
+  "version": "1.0.0",
+  "description": "for v1.0 Mobile Apps <code>iOS/Android only</code>",
+  "title": "健康管理系统(health) v1.0.0 手机移动网页端接口文档",
+  "url" : "",
+  "sampleUrl": "",
+  "header": {
+    "title": "基本定义",
+    "filename": "header.md"
+  },
+  "footer": {
+    "title": "更多信息",
+    "filename": "footer.md"
+  },
+  "template": {
+  	"withCompare": true,
+  	"withGenerator": false,
+    "forceLanguage": "zh_cn"
+  }
+}

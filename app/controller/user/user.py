@@ -83,7 +83,7 @@ def dietetic_daily():
 @model.route("/get/dietetic_daily_info/<string:diet_id>/")
 def dietetic_daily_info(diet_id):
     """
-       @api {GET} /user/get/dietetic_daily/<diet_id>/ 05. 我的-发布饮食日报详细信息
+       @api {GET} /user/get/dietetic_daily_info/<diet_id>/ 05. 我的-发布饮食日报详细信息
        @apiGroup U_用户_USER
        @apiVersion 1.0.0
        @apiPermission 访问授权
@@ -105,10 +105,10 @@ def dietetic_daily_info(diet_id):
        }
     """
 
-@model.route("/get/comprehensive_daily/")
-def comprehensive_daily():
+@model.route("/get/user_comprehensive_daily/")
+def user_comprehensive_daily():
     """
-       @api {GET} /user/get/comprehensive_daily/ 06. 我的-获取综合日报列表信息
+       @api {GET} /user/get/user_comprehensive_daily/ 06. 我的-获取综合日报列表信息
        @apiGroup U_用户_USER
        @apiVersion 1.0.0
        @apiPermission 访问授权
@@ -119,7 +119,7 @@ def comprehensive_daily():
             "arrange_weight" : Double # 变化体重 [单位：kg]
             "today_weight" : Double # 今日体重 [单位：kg]
              "comprehensive" : [{
-                "today_weight": Double # 今日体重
+                "weight": Double # 今日体重
                 "arrange_weight" : Double # 变化体重 [单位：kg]
                 "timed": Long # 创建时间
              }]
@@ -129,10 +129,10 @@ def comprehensive_daily():
     return  "sdfasdf"
 
 
-@model.route('/get/comprehensive_info/<string:comprehensive_id>/')
-def comprehensive_info(comprehensive_id):
+@model.route('/get/user_comprehensive_info/<string:comprehensive_id>/')
+def user_comprehensive_info(comprehensive_id):
     """
-        @api {GET} /user/get/comprehensive_info/<comprehensive_id>/ 07. 获取综合日报详细信息
+        @api {GET} /user/get/user_comprehensive_info/<comprehensive_id>/ 07. 获取综合日报详细信息
         @apiGroup U_用户_USER
         @apiVersion 1.0.0
         @apiPermission 访问授权

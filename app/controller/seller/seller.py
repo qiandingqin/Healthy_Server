@@ -3,37 +3,6 @@
 from flask import Blueprint
 model = Blueprint('seller', __name__)
 
-@model.route("/login/",methods=['POST'])
-def login():
-    """
-      @api {POST} /seller/login/ 01. 商家-登录
-      @apiGroup S_商家_Seller
-      @apiVersion 1.0.0
-
-      @apiPermission 访问授权
-
-      @apiParam {str} account 手机号码
-      @apiParam {str} [password] 密码
-      @apiSuccessExample {json} JSON.result 对象
-      {
-
-      }
-    """
-
-@model.route("/mine/logout/",methods=['POST'])
-def logout():
-    """
-      @api {POST} /seller/mine/logout/ 02. 商家-退出登录
-      @apiGroup S_商家_Seller
-      @apiVersion 1.0.0
-
-      @apiPermission 用户登录
-      @apiSuccessExample {json} JSON.result 对象
-      {
-
-      }
-    """
-
 @model.route("/my_clients/",methods=['POST'])
 def my_clients():
     """
@@ -146,10 +115,10 @@ def user_recipes(user_id):
        }
     """
 
-@model.route('/dietetic_daily/<string:user_id>/')
-def dietetic_daily(user_id):
+@model.route('/sell_dietetic_daily/<string:user_id>/')
+def sell_dietetic_daily(user_id):
     """
-       @api {GET} /seller/dietetic_daily/<user_id>/ 09. 获取用户饮食日报列表
+       @api {GET} /seller/sell_dietetic_daily/<user_id>/ 09. 获取用户饮食日报列表
        @apiGroup S_商家_Seller
        @apiVersion 1.0.0
        @apiPermission 访问授权
@@ -166,10 +135,10 @@ def dietetic_daily(user_id):
        }
     """
 
-@model.route('/comprehensive_daily/<string:user_id>/')
-def comprehensive_daily(user_id):
+@model.route('/sell_comprehensive_daily/<string:user_id>/')
+def sell_comprehensive_daily(user_id):
     """
-       @api {GET} /seller/comprehensive_daily/<user_id>/ 10. 获取用户综合日报列表信息
+       @api {GET} /seller/sell_comprehensive_daily/<user_id>/ 10. 获取用户综合日报列表信息
        @apiGroup U_用户_USER
        @apiVersion 1.0.0
        @apiPermission 访问授权
@@ -181,7 +150,7 @@ def comprehensive_daily(user_id):
             "arrange_weight" : Double # 变化体重 [单位：kg]
             "today_weight" : Double # 今日体重 [单位：kg]
              "comprehensive" : [{
-                "today_weight": Double # 今日体重
+                "weight": Double # 今日体重
                 "arrange_weight" : Double # 变化体重 [单位：kg]
                 "timed": Long # 创建时间
              }]
