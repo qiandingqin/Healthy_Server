@@ -1,29 +1,8 @@
 # coding=utf-8
 # -*- coding: utf-8 -*-
-from flask import Blueprint, request, session, g, render_template
+from flask import Blueprint, request, session, g, render_template,jsonify
+from conf.config import appID,appsecret, users, dietetic_daily, comprehensive_daily, recipes
 model = Blueprint('user', __name__)
-
-@model.route("/user/oauth/<string:open_id>/",methods=['post'])
-def oauth(open_id):
-    """
-       @api {POST} /user/oauth/<open_id>/ 01. 用户-第三方账号登录
-       @apiGroup U_用户_USER
-       @apiVersion 1.0.0
-
-       @apiPermission 访问授权
-
-       @apiParam {str} open_id 第三方唯一ID
-       @apiParam {str} token 第三方授权TOKEN
-       @apiParam {long} expire 失效时间
-       @apiParam {str} name 第三方昵称
-       @apiParam {str} avatar 第三方头像
-       @apiParam {int} sex 第三方性别
-
-       @apiSuccessExample {json} JSON.result 对象
-       {
-
-       }
-      """
 
 @model.route("/user/today_recipes/")
 def today_recipes():
@@ -44,6 +23,25 @@ def today_recipes():
          ]
        }
     """
+    try:
+        if request.args.get('next_start'):
+            next_start = int(request.args.get('next_start'))
+        else:
+            next_start = 0
+        user_id = session["user_id"]
+        find_all = users.find({"user_id": user_id}).skip(next_start).limit(10)
+    except user_id:
+        return "user_id:异常"
+    except find_all:
+        return "获取数据异常"
+    else:
+        return jsonify(find_all)
+
+
+
+
+
+
 
 @model.route("/user/dietetic_daily_list/")
 def dietetic_daily_list():
