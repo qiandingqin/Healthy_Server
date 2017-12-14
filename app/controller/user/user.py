@@ -331,8 +331,8 @@ def files_upload():
        {
        }
     """
-    # 还没有写完（有问题）
-    abpath = os.path.abspath('../tmp/')
+    abpath = os.path.abspath('/upload/')
+    aaa = request.files.getlist("file")
     for upload in request.files.getlist("file"):
         file_name = upload.filename.rsplit("/")[0]
         destination = "/".join([abpath, file_name])
@@ -356,6 +356,16 @@ def update_user():
        {
        }
     """
-
-    pass
+    user_id = "5a30d8954aee308711f1cfa2",
+    update = DB.users.update_one({"_id": user_id,
+                                  "sex": int(request.form.get("sex")) or 0,
+                                  "avatar": request.form.get("avatar") or "",
+                                  "name": request.form.get("height") or "",
+                                  "phone": request.form.get("double") or "",
+                                  "address": request.form.get("address") or "",
+                                  })
+    if update > 0:
+        return jsonify({"code": 1, "msg": "数据编辑成功"})
+    else:
+        return jsonify({"code": 2, "msg": "数据编辑失败"})
 
