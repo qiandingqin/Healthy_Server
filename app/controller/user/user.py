@@ -7,6 +7,25 @@ from bson.json_util import dumps
 import os
 model = Blueprint('user', __name__)
 
+@model.route("/user/user_info/")
+def user_info():
+    """
+       @api {GET} /user/user_info/ 01. 我的(会员用户)-信息
+       @apiGroup U_用户_USER
+       @apiVersion 1.0.0
+       @apiSuccessExample {json} JSON.result 对象
+    """
+    # user_id = session["user_id"]
+    user_id = str("5a30d3694aee3086ea6d7c29")
+
+    find = users.find_one({"_id": user_id, "status": 0, "type": 0})
+    data = {
+        "code": 1,
+        "today_recipes": dumps(find)
+    }
+    return jsonify(data)
+
+
 @model.route("/user/today_recipes/")
 def today_recipes():
     """
@@ -88,6 +107,7 @@ def dietetic_daily():
        {
        }
     """
+    user_id = "5a30d8954aee308711f1cfa2"
     if request.form.get("type" >= 3):
         return "用餐类别异常"
     images = request.form.getlist("images"),
@@ -95,7 +115,7 @@ def dietetic_daily():
     data = {
         "_id": bson.objectid.ObjectId().__str__(),
         # "user_id": session["user_id"],
-        "user_id": "5a30d8954aee308711f1cfa2",
+        "user_id": user_id,
         "dietetics": [{
             "content": request.form.get("content"),
             "images": [{
@@ -111,7 +131,12 @@ def dietetic_daily():
     }
     insert_one = DB.dietetic_daily.insert_one(data)
     if insert_one.inserted_id:
-        return jsonify({"code": 1, "msg": "添加数据成功"})
+        # 更新用户表里面的最新饮食日报发布时间，根据时间判断是否已报
+        updates = DB.users.update_one({"_id": user_id, "diet_timed": int(time.time())})
+        if updates > 0:
+            return jsonify({"code": 1, "msg": "添加数据成功"})
+        else:
+            return jsonify({"code": 0, "msg": "添加数据失败"})
     else:
         return jsonify({"code": 0, "msg": "添加数据失败"})
 
@@ -225,25 +250,25 @@ def user_comprehensive_info(comprehensive_id):
 @model.route('/user/add_comprehensive_daily/', methods=['post'])
 def add_comprehensive_daily():
     """
-       @api {POST} /user/add_comprehensive_daily/ 10. 添加综合日报
+       @api {POST} /user/add_comprehensive_daily/ 08. 添加综合日报
        @apiGroup U_用户_USER
        @apiVersion 1.0.0
        @apiPermission 访问授权
        @apiParam {double} weight 体重
-       @apiParam {int} waist 腰围
-       @apiParam {list} images 运动量图片
+       @apiParam {double} waist 腰围
+       @apiParam {list} images 运动量图片2
        @apiSuccessExample {json} JSON.result 对象
        {
        }
     """
     images = request.form.getlist("images"),
-
+    user_id = "5a30d8954aee308711f1cfa2"
     data = {
         "_id": bson.objectid.ObjectId().__str__(),
         # "user_id": session["user_id"],
         "user_id": "5a30d8954aee308711f1cfa2",
-        "weight": request.form.get("weight") or "",
-        "waist": request.form.get("waist") or "",
+        "weight": float(request.form.get("weight")) or float(0),
+        "waist": float(request.form.get("waist")) or float(0),
         "images": {
             "url": "阿凡达广发华福感到十分",  # 图片地址
             "ratio": float(0),  # 图片宽高比
@@ -252,7 +277,16 @@ def add_comprehensive_daily():
     }
     insert_one = DB.comprehensive_daily.insert_one(data)
     if insert_one.inserted_id:
-        return jsonify({"code": 1, "msg": "添加数据成功"})
+        # 更新用户表
+        updates = DB.users.update_one({"_id": user_id,
+                                       "assessment": "",
+                                       "weight": float(request.form.get("weight")) or float(0),
+                                       "waist": float(request.form.get("waist")) or float(0),
+                                       })
+        if updates > 0:
+            return jsonify({"code": 1, "msg": "添加数据成功", "assessment":""})
+        else:
+            return jsonify({"code": 0, "msg": "添加数据失败"})
     else:
         return jsonify({"code": 0, "msg": "添加数据失败"})
 
@@ -260,7 +294,7 @@ def add_comprehensive_daily():
 @model.route('/user/obesity_test/', methods=['post'])
 def obesity_test():
     """
-       @api {POST} /user/obesity_test/ 08. 肥胖测试
+       @api {POST} /user/obesity_test/ 09. 肥胖测试
        @apiGroup U_用户_USER
        @apiVersion 1.0.0
        @apiPermission 访问授权
@@ -282,9 +316,10 @@ def obesity_test():
                                   "height": int(request.form.get("height")) or 0,
                                   "weight": float(request.form.get("double")) or float(0),
                                   "sport": request.form.get("sport") or "",
+                                  "assessment": "",
                                   })
     if update > 0:
-        return jsonify({"code": 1, "msg": "数据编辑成功"})
+        return jsonify({"code": 1, "msg": "数据编辑成功", "assessment": "",})
     else:
         return jsonify({"code": 2, "msg": "数据编辑失败"})
 
@@ -293,7 +328,7 @@ def obesity_test():
 @model.route('/user/apply_free_consultation/',methods=['post'])
 def apply_free_consultation():
     """
-       @api {POST} /user/apply_free_consultation/ 09. 申请免费咨询
+       @api {POST} /user/apply_free_consultation/ 010. 申请免费咨询
        @apiGroup U_用户_USER
        @apiVersion 1.0.0
        @apiPermission 访问授权
@@ -323,7 +358,7 @@ def apply_free_consultation():
 @model.route('/user/files_upload/',methods=['post'])
 def files_upload():
     """
-       @api {POST} /user/files_upload/ 10. 文件上传接口
+       @api {POST} /user/files_upload/ 11. 文件上传接口
        @apiGroup U_用户_USER
        @apiVersion 1.0.0
        @apiPermission 访问授权
@@ -343,7 +378,7 @@ def files_upload():
 @model.route('/user/update_user/', methods= ['post'])
 def update_user():
     """
-       @api {POST} /user/update_user/ 11. 修改个人资料
+       @api {POST} /user/update_user/ 12. 修改个人资料
        @apiGroup U_用户_USER
        @apiVersion 1.0.0
        @apiPermission 访问授权
