@@ -1,15 +1,10 @@
 # coding=utf-8
 # -*- coding: utf-8 -*-
-from flask import Blueprint, request, g, render_template, session, redirect, url_for
+from flask import Blueprint, request, g, render_template, session, redirect, url_for, jsonify
 from conf.config import appID,appsecret, users, dietetic_daily, comprehensive_daily, recipes
 from app.auth import requery_auth
 from urllib import urlencode
-import requests, bson
-import urllib
-import httplib
-import json
-import hashlib
-import time
+import requests, bson, os, urllib, httplib, json, time
 model = Blueprint('index', __name__)
 
 @model.route('/')
@@ -78,10 +73,22 @@ def index():
                 return "商家页面"
 
 
-@model.route("/admin")
-@requery_auth
-def admin():
-    pass
+
+@model.route("/uploads")
+def uploads():
+    return render_template("upload.html")
+
+@model.route("/admin_files")
+# @requery_auth
+def admin_files():
+    abpath = os.path.abspath('/upload/')
+    aaa = request.files.getlist("file")
+    for upload in request.files.getlist("file"):
+        file_name = upload.filename.rsplit("/")[0]
+        destination = "/".join([abpath, file_name])
+        upload.save(destination)
+        result = (file_name, destination)
+    return jsonify({"code": 0, "filename": "%s" % result})
 
 
 
