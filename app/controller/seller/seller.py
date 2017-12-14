@@ -28,7 +28,7 @@ def my_clients():
     """
     code = 0
     try:
-        members = users.find({'type': 0, "apply_status": 1}).limit(item_count()).skip(next_start()).reverse("timed")
+        members = users.find({'type': 0, "apply_status": 1}).limit(item_count()).skip(next_start()).sort("timed")
     except enumerate:
         code = -1
     data = []
@@ -97,7 +97,7 @@ def apply_clients():
     lists = []
     code = 0
     try:
-        list = users.find({"type": 0, "apply_status": 0}).limit(item_count()).skip(next_start()).reverse("timed")
+        list = users.find({"type": 0, "apply_status": 0}).limit(item_count()).skip(next_start()).sort("timed")
         for user in list:
             us = {}
             us['_id'] = user['_id']
@@ -196,7 +196,7 @@ def user_recipes(user_id):
     code = 0
     lists = []
     try:
-        lists = DB.recipes.find({"user_id",user_id}).limit(item_count()).skip(next_start()).reverse("timed")
+        lists = DB.recipes.find({"user_id",user_id}).limit(item_count()).skip(next_start()).sort("timed")
     except:
         code = -1
     list = []
@@ -232,7 +232,7 @@ def sell_dietetic_daily(user_id):
     code = 0
     lists = []
     try:
-        lists = DB.dietetic_daily.find({"user_id",user_id}).limit(item_count()).skip(next_start()).reverse("timed")
+        lists = DB.dietetic_daily.find({"user_id",user_id}).limit(item_count()).skip(next_start()).sort("timed")
     except:
         code = -1
     list = []
@@ -270,7 +270,7 @@ def sell_comprehensive_daily(user_id):
     lists = []
     code = 0
     try:
-        list = DB.comprehensive_daily.find({"user_id": user_id}).limit(item_count()).skip(next_start()).reverse("timed")
+        list = DB.comprehensive_daily.find({"user_id": user_id}).limit(item_count()).skip(next_start()).sort("timed")
         user = users.find_one({"_id": user_id})
         today_weight = {}
         for comprehen in list:

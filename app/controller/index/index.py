@@ -74,9 +74,6 @@ def index():
 
 
 
-
-
-
 @model.route("/uploads")
 def uploads():
     return render_template("upload.html")
