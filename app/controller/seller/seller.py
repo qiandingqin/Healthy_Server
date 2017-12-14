@@ -27,10 +27,8 @@ def my_clients():
        }
     """
     code = 0
-    print str(next_start())+"next_start"
-    print str(item_count())+"item_count"
     try:
-        members = users.find({'type': 0, "apply_status": 1,"status": 0}).limit(item_count()).skip(next_start()).sort("timed")
+        members = users.find({'type': 0, "apply_status": 1, "status": 0}).limit(item_count()).skip(next_start()).sort("timed")
     except:
         code = -1
     data = []

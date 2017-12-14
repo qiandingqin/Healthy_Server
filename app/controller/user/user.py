@@ -14,6 +14,8 @@ def user_info():
        @apiGroup U_用户_USER
        @apiVersion 1.0.0
        @apiSuccessExample {json} JSON.result 对象
+       {
+       }
     """
     # user_id = session["user_id"]
     user_id = str("5a30d3694aee3086ea6d7c29")
@@ -68,7 +70,7 @@ def dietetic_daily_list():
        @apiVersion 1.0.0
        @apiPermission 访问授权
        @apiParam {str} next_start 分页起始ID 默认值: null
-        @apiSuccessExample {json} JSON.result 对象
+       @apiSuccessExample {json} JSON.result 对象
        {
          dietetic_daily:[
             {
