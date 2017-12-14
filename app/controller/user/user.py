@@ -308,18 +308,24 @@ def obesity_test():
         ...
        }
     """
+    if request.form.get("weight") and request.form.get("height"):
+        # 计算
+        return jsonify({"assessment": "测试结果", "norm_weight": "标准体重", "weight": float(request.form.get("weight"))})
+    else:
+        return "参数错误"
+
     # "user_id": session["user_id"],
     user_id = "5a30d8954aee308711f1cfa2",
     update = DB.users.update_one({"_id": user_id,
                                   "sex": int(request.form.get("sex")) or 0,
                                   "age": int(request.form.get("age")) or 0,
                                   "height": int(request.form.get("height")) or 0,
-                                  "weight": float(request.form.get("double")) or float(0),
+                                  "weight": float(request.form.get("weight")) or float(0),
                                   "sport": request.form.get("sport") or "",
                                   "assessment": "",
                                   })
     if update > 0:
-        return jsonify({"code": 1, "msg": "数据编辑成功", "assessment": "",})
+        return jsonify({"code": 1, "msg": "数据编辑成功"})
     else:
         return jsonify({"code": 2, "msg": "数据编辑失败"})
 
