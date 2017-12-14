@@ -335,5 +335,5 @@ def files_upload():
         destination = "/".join([abpath, file_name])
         upload.save(destination)
         result = (file_name, destination)
-    return jsonify({"code":0,"filename":"%s" % result})
+    return jsonify({"code": 0, "filename": "%s" % result})
 
