@@ -372,14 +372,13 @@ def files_upload():
        {
        }
     """
-    abpath = os.path.abspath('/upload/')
-    aaa = request.files.getlist("file")
+    abpath = os.path.abspath('./upload/')
     for upload in request.files.getlist("file"):
         file_name = upload.filename.rsplit("/")[0]
         destination = "/".join([abpath, file_name])
-        upload.save(destination)
-        result = (file_name, destination)
-    return jsonify({"code": 0, "filename": "%s" % result})
+        upload.save(str(destination))
+        result = {"file_name": file_name, "destination": destination}
+    return jsonify({"code": 1, "filename": result})
 
 @model.route('/user/update_user/', methods= ['post'])
 def update_user():

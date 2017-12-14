@@ -16,62 +16,67 @@
     </style>
 </head>
 <body scoll=no>
-<div class="wrapper wrapper-content animated fadeInRight">
-            <div class="row">
-                <div class="col-lg-12" style="overflow-y:auto;height: 800px">
-                <div class="ibox float-e-margins">
-                    <div class="adds">
-                        <form class="form-inline" enctype="multipart/form-data">
-                            <div class="form-group has-success has-feedback paddings">
-                                <label class="control-label" for="inputGroupSuccess3">照片信息 ： &nbsp;</label>
-                                   <button type="button" class="layui-btn" id="load">
-                                      <i class="layui-icon">&#xe67c;</i>上传设备图片
-                                   </button>
-                            </div>
+<form action="http://www.zhl.com:8888/user/files_upload/" method="post" enctype="multipart/form-data">
+    <input type="file" name="file" value="">
+    <input type="submit" value="提交">
+</form>
 
-                            <div class="layui-form-item text-center paddings" style="width: 40%">
-                                <button type="button" class="btn btn-primary" onclick="add_iot()">&nbsp; 提 交 &nbsp;</button>
-                                <button type="button" class="btn btn-warning lefts" onclick="window.history.back()">&nbsp; 返 回 &nbsp;</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            </div>
-        </div>
+{#<div class="wrapper wrapper-content animated fadeInRight">#}
+{#            <div class="row">#}
+{#                <div class="col-lg-12" style="overflow-y:auto;height: 800px">#}
+{#                <div class="ibox float-e-margins">#}
+{#                    <div class="adds">#}
+{#                        <form class="form-inline" enctype="multipart/form-data">#}
+{#                            <div class="form-group has-success has-feedback paddings">#}
+{#                                <label class="control-label" for="inputGroupSuccess3">照片信息 ： &nbsp;</label>#}
+{#                                   <button type="button" class="layui-btn" id="load">#}
+{#                                      <i class="layui-icon">&#xe67c;</i>上传设备图片#}
+{#                                   </button>#}
+{#                            </div>#}
+{##}
+{#                            <div class="layui-form-item text-center paddings" style="width: 40%">#}
+{#                                <button type="button" class="btn btn-primary" onclick="add_iot()">&nbsp; 提 交 &nbsp;</button>#}
+{#                                <button type="button" class="btn btn-warning lefts" onclick="window.history.back()">&nbsp; 返 回 &nbsp;</button>#}
+{#                            </div>#}
+{#                        </form>#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
+{#            </div>#}
+{#        </div>#}
 <script src="{{ url_for('static', filename='js/jquery-2.1.1.js') }}"></script>
-<script>
-
-add_file_arr = new Array();
- /*批量导入*/
-/*#load:为按钮,点击后生成一个隐藏的input file标签*/
-$('#load').after('<input type="file" id="load_xls" name="file" style="display:none" onchange ="uploadFile()">');
-$('#load').click(function(){
-    document.getElementById("load_xls").click();
-});
-function uploadFile() {
-    var myform = new FormData();
-    myform.append('file',$('#load_xls')[0].files[0]);
-    // console.log(myform.append('file',$('#load_xls')[0].files[0]));return
-    $.ajax({
-        url: "http://www.zhl.com:8888/admin_files",
-        type: "POST",
-        data: myform,
-        processData: false,
-        success: function (data) {
-            if(data.code==0){
-                add_file_arr.push(data.filename)
-                layer.msg('文件上传成功',{icon:1})
-            }else {
-                layer.msg('文件上传失败',{icon:7})
-            }
-        },
-        error:function(data){
-            console.log(data)
-        }
-    });
-}
-</script>
+{#<script>#}
+{##}
+{#add_file_arr = new Array();#}
+{# /*批量导入*/#}
+{#/*#load:为按钮,点击后生成一个隐藏的input file标签*/#}
+{#$('#load').after('<input type="file" id="load_xls" name="file" style="display:none" onchange ="uploadFile()">');#}
+{#$('#load').click(function(){#}
+{#    document.getElementById("load_xls").click();#}
+{#});#}
+{#function uploadFile() {#}
+{#    var myform = new FormData();#}
+{#    myform.append('file',$('#load_xls')[0].files[0]);#}
+{#    // console.log(myform.append('file',$('#load_xls')[0].files[0]));return#}
+{#    $.ajax({#}
+{#        url: "http://www.zhl.com:8888/admin_files",#}
+{#        type: "POST",#}
+{#        data: myform,#}
+{#        processData: false,#}
+{#        success: function (data) {#}
+{#            if(data.code==0){#}
+{#                add_file_arr.push(data.filename)#}
+{#                layer.msg('文件上传成功',{icon:1})#}
+{#            }else {#}
+{#                layer.msg('文件上传失败',{icon:7})#}
+{#            }#}
+{#        },#}
+{#        error:function(data){#}
+{#            console.log(data)#}
+{#        }#}
+{#    });#}
+{#}#}
+{#</script>#}
     <!-- Mainly scripts -->
     <!-- Page-Level Scripts -->
 </body>
