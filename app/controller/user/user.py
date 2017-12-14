@@ -229,6 +229,9 @@ def add_comprehensive_daily():
        @apiGroup U_用户_USER
        @apiVersion 1.0.0
        @apiPermission 访问授权
+       @apiParam {double} weight 体重
+       @apiParam {int} waist 腰围
+       @apiParam {list} images 运动量图片
        @apiSuccessExample {json} JSON.result 对象
        {
        }
