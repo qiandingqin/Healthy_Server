@@ -340,3 +340,22 @@ def files_upload():
         result = (file_name, destination)
     return jsonify({"code": 0, "filename": "%s" % result})
 
+@model.route('/user/update_user/', methods= ['post'])
+def update_user():
+    """
+       @api {POST} /user/update_user/ 11. 修改个人资料
+       @apiGroup U_用户_USER
+       @apiVersion 1.0.0
+       @apiPermission 访问授权
+       @apiParam {list} avatar 头像
+       @apiParam {str} name 姓名
+       @apiParam {int} sex 性别
+       @apiParam {str} phone 电话
+       @apiParam {str} address 地址
+       @apiSuccessExample {json} JSON.result 对象
+       {
+       }
+    """
+
+    pass
+

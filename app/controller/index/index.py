@@ -81,7 +81,7 @@ def index():
 @model.route("/admin")
 @requery_auth
 def admin():
-
+    pass
 
 
 
