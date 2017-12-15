@@ -50,7 +50,7 @@ def today_recipes():
     if request.args.get('next_start'):
         next_start = int(request.args.get('next_start'))*10
     else:
-        return "参数错误"
+        return jsonify({"code": -10001, "mag": "参数错误"})
     # user_id = session["user_id"]
     user_id = "5a30d8954aee308711f1cfa2"
     find_all = recipes.find({"user_id": user_id or ""}).skip(next_start).limit(10)
@@ -80,10 +80,10 @@ def dietetic_daily_list():
     if request.args.get('next_start'):
         next_start = int(request.args.get('next_start'))*10
     else:
-        return "参数错误"
+        return jsonify({"code": -10001, "mag": "参数错误"})
     user_id = "5a30d8954aee308711f1cfa2"
     # user_id = session["user_id"]
-    find_all = DB.dietetic_daily.find_one({"user_id": user_id or "", "status": 0}).skip(next_start).limit(10)
+    find_all = DB.dietetic_daily.find({"user_id": user_id, "status": 0}).skip(next_start).limit(10)
     return common.findAll(find_all)
 
 
@@ -143,7 +143,7 @@ def dietetic_daily():
         data = {
                 "content": request.form.get("content"),
                 "images": [{
-                    "url": "阿凡达广发华福感到十分",  # 图片地址
+                    "url": "wert",  # 图片地址
                     "ratio": float(0),  # 图片宽高比
                 }],
                 "timed": int(time.time()),
@@ -153,10 +153,10 @@ def dietetic_daily():
         for type_detil in find_one["dietetics"]:
             dietetic_daily_type = type_detil["type"]
             if dietetic_daily_type == type:
-                update_dietetic_daily = DB.dietetic_daily.save({"_id": dietetic_daily_id, "user_id": user_id,"dietetics.type": dietetic_daily_type, "day": times, "status": 0}, {"$set": {"dietetics": [data]}})
+                update_dietetic_daily = DB.dietetic_daily.update({"_id": dietetic_daily_id, "user_id": user_id, "day": times, "status": 0, "dietetics.type": dietetic_daily_type}, {"$set": {"dietetics": [data]}})
             else:
-                update_dietetic_daily = DB.dietetic_daily.save({"_id": dietetic_daily_id, "user_id": user_id, "dietetics.type": dietetic_daily_type, "day": times, "status": 0}, {"$set": {"dietetics": [data]}})
-        if update_dietetic_daily.matched_count > 0:
+                update_dietetic_daily = DB.dietetic_daily.update({"_id": dietetic_daily_id, "user_id": user_id, "day": times, "status": 0, "dietetics.type": dietetic_daily_type}, {"$set": {"dietetics": [data]}})
+        if update_dietetic_daily:
             # 更新用户表里面的最新饮食日报发布时间，根据时间判断是否已报
             updates = DB.users.update_one({"_id": user_id}, {"$set": {"diet_timed": time.time()}})
             if updates.matched_count > 0:
