@@ -226,7 +226,7 @@ def dietetic_daily_info(diet_id):
        @apiParam {str} diet_id 饮食日报ID
        @apiSuccessExample {json} JSON.result 对象
        {
-             "dietetic" : [{
+             "dietetics" : [{
                 "content": String # 内容
                 "images": [  # 饮食图片资料数组
                     {
