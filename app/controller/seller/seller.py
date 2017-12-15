@@ -61,7 +61,7 @@ def recipes(user_id):
     """
     if not user_id:
         return "请求参数错误"
-    user = users.find_one({"_id": user_id, "type": 0, "apply_status": 1})
+    user = users.find_one(filter={"_id": user_id, "type": 0, "apply_status": 1}, projection={"_id": 1})
     if not user:
         return "该用户不存在或还不是您的会员"
     content = request.form.get("content")
@@ -142,7 +142,7 @@ def apply_clients_info(user_id):
     data = {}
     code = 0
     try:
-        data = users.find_one({"_id": user_id})
+        data = users.find_one(filter={"_id": user_id}, projection={"_id": 1, "name": 1, "phone": 1, "avatar": 1, "sex": 1,"apply_weight": 1, "estimated_times": 1, "age": 1, "height": 1,"weight": 1, "assessment": 1, "sport": 1})
     except:
         code = -1
     return apiresult(data, code)
@@ -163,7 +163,7 @@ def create_apply(user_id):
     """
     if not user_id:
         return "请求参数错误"
-    user = users.find_one({"_id": user_id});
+    user = users.find_one(filter={"_id": user_id},projetction={"_id":1});
     code = 0
     if not user:
         return "该用户不存在"
@@ -201,7 +201,7 @@ def user_recipes(user_id):
     code = 0
     lists = []
     try:
-        lists = DB.recipes.find({"user_id": user_id}).limit(item_count()).skip(next_start()).sort("timed", pymongo.DESCENDING)
+        lists = DB.recipes.find(filter={"user_id": user_id}, projection={"_id": 1, "content": 1, "timed": 1}).limit(item_count()).skip(next_start()).sort("timed", pymongo.DESCENDING)
     except:
         code = -1
     list = []
@@ -237,7 +237,7 @@ def sell_dietetic_daily(user_id):
     code = 0
     lists = []
     try:
-        lists = DB.dietetic_daily.find({"user_id": user_id}).limit(item_count()).skip(next_start()).sort("timed", pymongo.DESCENDING)
+        lists = DB.dietetic_daily.find(filter={"user_id": user_id}, projection={"_id": 1, "timed": 1}).limit(item_count()).skip(next_start()).sort("timed", pymongo.DESCENDING)
     except:
         code = -1
     list = []
@@ -275,8 +275,8 @@ def sell_comprehensive_daily(user_id):
     code = 0
     result = {}
     try:
-        list = DB.comprehensive_daily.find({"user_id": user_id}).limit(item_count()).skip(next_start()).sort("timed", pymongo.DESCENDING)
-        user = users.find_one({"_id": user_id})
+        list = DB.comprehensive_daily.find(filter={"user_id": user_id}, projection={"weight": 1, "timed": 1, "_id": 1}).limit(item_count()).skip(next_start()).sort("timed", pymongo.DESCENDING)
+        user = users.find_one(filter={"_id": user_id}, projection={"_id": 1, "weight": 1, "local_weight": 1})
         for comprehen in list:
             com = {}
             com['_id'] = comprehen['_id']
