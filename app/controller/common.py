@@ -80,7 +80,7 @@ def findAll(find_all, code=1):
     }
     return jsonify(datas)
 
-def find(find,code=1):
+def find(find,code=0):
     datas = {
         "code": code,
         "result": find

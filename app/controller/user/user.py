@@ -157,7 +157,7 @@ def dietetic_daily():
             "dietetics": [{
                 "content": request.form.get("content"),
                 "images": [{
-                        "url": "阿凡达广发华福感到十分",  # 图片地址
+                        "url": "sdfghhgfdssdfghgfd",  # 图片地址
                         "ratio": float(0),  # 图片宽高比
                     }],
                 "timed": int(time.time()),
@@ -172,16 +172,13 @@ def dietetic_daily():
             # 更新用户表里面的最新饮食日报发布时间，根据时间判断是否已报
             updates = DB.users.update_one({"_id": user_id}, {"$set": {"diet_timed": time.time()}})
             if updates > 0:
-                return jsonify({"code": 1, "msg": "添加数据成功"})
+                return jsonify({"code": 0, "msg": "添加数据成功"})
             else:
-                return jsonify({"code": 0, "msg": "添加数据失败"})
+                return jsonify({"code": -1, "msg": "添加数据失败"})
         else:
-            return jsonify({"code": 0, "msg": "添加数据失败"})
+            return jsonify({"code": -1, "msg": "添加数据失败"})
     else:
-        dietetic_daily_id = find_one["_id"]
-        dietetic_daily_type = find_one["type"]
         data = {
-            "dietetics": [{
                 "content": request.form.get("content"),
                 "images": [{
                     "url": "阿凡达广发华福感到十分",  # 图片地址
@@ -189,19 +186,23 @@ def dietetic_daily():
                 }],
                 "timed": int(time.time()),
                 "type": type,
-            }],
-            "day": times,
             }
-        update_dietetic_daily = DB.dietetic_daily.replace_one({"_id": dietetic_daily_id, "user_id": user_id, "dietetics.type": dietetic_daily_type, "day": times, "status": 0}, data)
-        if update_dietetic_daily > 0:
+        dietetic_daily_id = find_one["_id"]
+        for type_detil in find_one["dietetics"]:
+            dietetic_daily_type = type_detil["type"]
+            if dietetic_daily_type == type:
+                update_dietetic_daily = DB.dietetic_daily.save({"_id": dietetic_daily_id, "user_id": user_id,"dietetics.type": dietetic_daily_type, "day": times, "status": 0}, {"$set": {"dietetics": [data]}})
+            else:
+                update_dietetic_daily = DB.dietetic_daily.save({"_id": dietetic_daily_id, "user_id": user_id, "dietetics.type": dietetic_daily_type, "day": times, "status": 0}, {"$set": {"dietetics": [data]}})
+        if update_dietetic_daily.matched_count > 0:
             # 更新用户表里面的最新饮食日报发布时间，根据时间判断是否已报
             updates = DB.users.update_one({"_id": user_id}, {"$set": {"diet_timed": time.time()}})
-            if updates > 0:
-                return jsonify({"code": 1, "msg": "添加数据成功"})
+            if updates.matched_count > 0:
+                return jsonify({"code": 0, "msg": "添加数据成功"})
             else:
-                return jsonify({"code": 0, "msg": "添加数据失败"})
+                return jsonify({"code": -1, "msg": "添加数据失败"})
         else:
-            return jsonify({"code": 0, "msg": "添加数据失败"})
+            return jsonify({"code": -1, "msg": "添加数据失败"})
 
 
 @model.route("/user/get/dietetic_daily_info/<string:diet_id>/")
@@ -331,11 +332,11 @@ def add_comprehensive_daily():
         # 更新用户表
         updates = DB.users.update_one({"_id": user_id}, {"$set": {"assessment": "", "weight": float(request.form.get("weight")) or float(0), "waist": float(request.form.get("waist")) or float(0)}})
         if updates > 0:
-            return jsonify({"code": 1, "msg": "添加数据成功", "assessment":""})
+            return jsonify({"code": 0, "msg": "添加数据成功", "assessment":""})
         else:
-            return jsonify({"code": 0, "msg": "添加数据失败"})
+            return jsonify({"code": -1, "msg": "添加数据失败"})
     else:
-        return jsonify({"code": 0, "msg": "添加数据失败"})
+        return jsonify({"code": -1, "msg": "添加数据失败"})
 
 
 @model.route('/user/obesity_test/', methods=['post'])
@@ -417,9 +418,9 @@ def apply_free_consultation():
     user_id = "5a30d8954aee308711f1cfa2",
     update = DB.users.update_one({"_id": user_id}, {"$set": {"sex": int(request.form.get("sex")) or 0, "age": int(request.form.get("age")) or 0, "height": int(request.form.get("height")) or 0, "weight": float(request.form.get("double")) or float(0), "sport": request.form.get("sport") or ""}})
     if update > 0:
-        return jsonify({"code": 1, "msg": "数据编辑成功"})
+        return jsonify({"code": 0, "msg": "数据编辑成功"})
     else:
-        return jsonify({"code": 2, "msg": "数据编辑失败"})
+        return jsonify({"code": -1, "msg": "数据编辑失败"})
 
 @model.route('/user/files_upload/',methods=['post'])
 def files_upload():
@@ -438,7 +439,7 @@ def files_upload():
         destination = "/".join([abpath, file_name])
         upload.save(str(destination))
         result = {"file_name": file_name, "destination": destination}
-    return jsonify({"code": 1, "filename": result})
+    return jsonify({"code": 0, "filename": result})
 
 @model.route('/user/update_user/', methods= ['post'])
 def update_user():
@@ -465,7 +466,7 @@ def update_user():
                                   "address": request.form.get("address") or "",
                                   })
     if update > 0:
-        return jsonify({"code": 1, "msg": "数据编辑成功"})
+        return jsonify({"code": 0, "msg": "数据编辑成功"})
     else:
-        return jsonify({"code": 2, "msg": "数据编辑失败"})
+        return jsonify({"code": -1, "msg": "数据编辑失败"})
 

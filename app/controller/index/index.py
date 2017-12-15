@@ -53,6 +53,7 @@ def index():
                 "is_report": int(0),
                 "status": int(0),
                 "online": int(1),
+                "address": "",
                 "times": {
                     "timed": int(time.time()),
                     "logined": int(time.time()),
