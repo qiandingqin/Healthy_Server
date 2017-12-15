@@ -70,7 +70,7 @@ def next_start(def_val= 0):
         page = def_val
     return page*item_count()
 
-def findAll(find_all, code=1):
+def findAll(find_all, code=0):
     data = []
     for finds in find_all:
         data.append(finds)

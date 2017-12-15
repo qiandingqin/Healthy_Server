@@ -54,6 +54,9 @@ def index():
                 "status": int(0),
                 "online": int(1),
                 "address": "",
+                "local_weight": float(0),
+                "local_waist": float(0),
+                "estimated_times": "",
                 "times": {
                     "timed": int(time.time()),
                     "logined": int(time.time()),
