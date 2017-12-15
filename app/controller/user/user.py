@@ -2,11 +2,10 @@
 # -*- coding: utf-8 -*-
 from flask import Blueprint, request, session, g, render_template,jsonify
 from conf.config import appID,appsecret, users, dietetic_daily, comprehensive_daily, recipes, DB
-import bson,time, json
+import bson,time, json, os
 from bson.json_util import dumps
 from app.controller import common
 from datetime import datetime
-import os
 model = Blueprint('user', __name__)
 
 @model.route("/user/user_info/")
@@ -180,20 +179,21 @@ def dietetic_daily():
             return jsonify({"code": -1, "msg": "添加数据失败"})
     else:
         data = {
-                "content": request.form.get("content"),
-                "images": [{
-                    "url": "wert",  # 图片地址
-                    "ratio": float(0),  # 图片宽高比
-                }],
-                "timed": int(time.time()),
-                "type": type,
-            }
+            "_id": bson.objectid.ObjectId().__str__(),
+            "content": request.form.get("content"),
+            "images": [{
+                "url": "wert",  # 图片地址
+                "ratio": float(0),  # 图片宽高比
+            }],
+            "timed": int(time.time()),
+            "type": type,
+        }
         dietetic_daily_id = find_one["_id"]
         for type_detil in find_one["dietetics"]:
             dietetic_daily_type = type_detil["type"]
             dietetic_id = type_detil["_id"]
             if dietetic_daily_type == type and dietetic_id:
-                update_dietetic_daily = DB.dietetic_daily.update({"_id": dietetic_daily_id, "user_id": user_id, "day": times, "status": 0, "dietetics.type": dietetic_daily_type}, {"$set": {"dietetics": data}})
+                update_dietetic_daily = DB.dietetic_daily.update({"_id": dietetic_daily_id, "user_id": user_id, "day": times, "status": 0, "dietetics.type": dietetic_daily_type}, {"$set": {"dietetics.$": data}})
                 if update_dietetic_daily != None:
                     # 更新用户表里面的最新饮食日报发布时间，根据时间判断是否已报
                     updates = DB.users.update_one({"_id": user_id}, {"$set": {"diet_timed": time.time()}})
@@ -203,17 +203,7 @@ def dietetic_daily():
                         return jsonify({"code": -1, "msg": "添加数据失败"})
                 else:
                     return jsonify({"code": -1, "msg": "添加数据失败"})
-            else:
-                data = {
-                    "_id": bson.objectid.ObjectId().__str__(),
-                    "content": request.form.get("content"),
-                    "images": [{
-                        "url": "wert",  # 图片地址
-                        "ratio": float(0),  # 图片宽高比
-                    }],
-                    "timed": int(time.time()),
-                    "type": type,
-                }
+            elif dietetic_daily_type != type:
                 update_dietetic_daily = DB.dietetic_daily.update({"_id": dietetic_daily_id, "user_id": user_id, "day": times, "status": 0}, {"$addToSet": {"dietetics": data}})
                 if update_dietetic_daily != None:
                     # 更新用户表里面的最新饮食日报发布时间，根据时间判断是否已报
@@ -256,7 +246,11 @@ def dietetic_daily_info(diet_id):
         return "参数错误"
     # user_id = session["user_id"]
     find = DB.dietetic_daily.find_one({"_id": diet_ids, "status": 0})
+    find['dietetics'] = sorted(find['dietetics'], cmp=sorts, reverse=False)
     return common.find(find)
+
+def sorts(a, b):
+    return a['type']-b['type']
 
 @model.route("/user/get/user_comprehensive_daily/")
 def user_comprehensive_daily():
@@ -386,7 +380,7 @@ def obesity_test():
         height = float(heights) / float(100)
         num = float(height) * float(height)
         Result = int(weight) / num
-        if Result < 18:
+        if Result < 18.5:
             standard = "营养不良"
         elif Result > 18.5 and Result < 23.9:
             standard = "正常体重"
