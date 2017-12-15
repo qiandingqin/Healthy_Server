@@ -16,8 +16,46 @@ def user_info():
        @apiGroup U_用户_USER
        @apiVersion 1.0.0
        @apiSuccessExample {json} JSON.result 对象
-       {
-       }
+        {
+            "_id": String # 主键，用户ID,
+            "account": String # 账号登录名
+            "password": String # 密码(系统自加密存储，不可逆)
+            "type": Int # 类别, [0=会员/1=商家]
+            "name": String # 姓名/昵称
+            "oauth": [
+                {
+                    "open_id": String # 第三方开放ID
+                    "name": String # 第三方昵称
+                    "avatar": String # 第三方头像
+                    "sex": Int # 第三方性别
+                    "timed": Long # 首次授权时间
+                }, ...
+            ],
+            "phone": String #联系方式
+            "avatar": String # 头像
+            "sex": Int # 性别: [-1=未知/1=男/2=女]
+            "apply_weight" : Double #申请减重[单位：kg]
+            "estimated_times" : String #预计时间
+            "age": Int #年龄
+            "height" : Int #身高 [cm]
+            "weight" : Double #体重 [kg]
+            "local_weight" : Double #原始体重 [kg]
+            "local_waist" : Double #原始腰围 [cm]
+            "sport" : String # 运动
+            "apply_status" : Int # 申请状态[0=申请/1=商家同意/-1=商家不同意/2=默认状态]
+            "assessment" : String # 当前评估
+            "diet_timed" : Long #最新饮食日报发布时间，根据时间判断是否已报
+            "is_report" : Long #最新食谱发布时间，根据时间判断商家是否配餐
+            "status": Int # 状态: [0=正常/-1=停止]
+            "online": Int # 在线状态: [0=离线/1=在线]
+            "address": String # 地址
+            "times": {
+                "timed": Long # 创建时间
+                "logined": Long # 最后登录时间, 0=还没有登录过
+                "stoped": Long # 停用起始时间, 如果status=-1时可以通过这个时间恢复正常
+                "stop_elapse": Long # 停用时长(秒), -1=永久
+            }
+        }
     """
     try:
         # user_id = session["user_id"]
@@ -170,7 +208,7 @@ def dietetic_daily():
 @model.route("/user/get/dietetic_daily_info/<string:diet_id>/")
 def dietetic_daily_info(diet_id):
     """
-       @api {GET} /user/get/dietetic_daily_info/<diet_id>/ 05. 我的-发布饮食日报详细信息
+       @api {GET} /user/get/dietetic_daily_info/<diet_id>/ 05. 我的-饮食日报详细信息
        @apiGroup U_用户_USER
        @apiVersion 1.0.0
        @apiPermission 访问授权

@@ -253,10 +253,9 @@ def sell_dietetic_daily(user_id):
 def sell_comprehensive_daily(user_id):
     """
        @api {GET} /seller/sell_comprehensive_daily/<user_id>/ 10. 获取用户综合日报列表信息
-       @apiGroup U_用户_USER
+       @apiGroup S_商家_Seller
        @apiVersion 1.0.0
        @apiPermission 访问授权
-       @apiParam {str} user_id 用户ID
        @apiParam {str} next_start 分页起始ID 默认值: null
        @apiSuccessExample {json} JSON.result 对象
        {
@@ -285,15 +284,17 @@ def sell_comprehensive_daily(user_id):
             if comprehen['weight'] and user['weight']:
                 com['arrange_weight'] = comprehen['weight'] - user['weight']
             else:
-                com['arrange_weight'] = 0
+                com['arrange_weight'] = float(0)
             com['timed'] = comprehen['timed']
             lists.append(com)
+        arrange_weight = float(0)
         if user:
-            if user['weight'] and user['local_weight']:
+            if ("weight" in user) and ("local_weight" in user):
                 arrange_weight = user['local_weight'] - user['weight']
+                result = {"local_weight": user['local_weight'], "arrange_weight": arrange_weight, "today_weight": user['weight'], "comprehensive": lists}
+            result = {"local_weight": float(0), "arrange_weight": arrange_weight, "today_weight": user['weight'], "comprehensive": lists}
         else:
-            arrange_weight = 0
-        result = {"local_weight": user['local_weight'], "arrange_weight": arrange_weight, "today_weight": user['weight'], "comprehensive": lists}
+            result = {"local_weight": float(0), "arrange_weight": arrange_weight, "today_weight": float(0), "comprehensive": lists}
     except:
         code = -1
 
