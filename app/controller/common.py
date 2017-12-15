@@ -70,3 +70,21 @@ def next_start(def_val= 0):
     else:
         page = def_val
     return page*item_count()
+
+def findAll(find_all, code=1):
+    data = []
+    for finds in find_all:
+        data.append(finds)
+    datas = {
+        "code": code,
+        "result": data
+    }
+    return jsonify(datas)
+
+def find(find,code=1):
+    datas = {
+        "code": code,
+        "result": find
+    }
+    return jsonify(datas)
+
