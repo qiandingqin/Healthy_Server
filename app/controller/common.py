@@ -47,7 +47,7 @@ def abort(code, msg=None):
         msg = '请求的参数错误'
     # raise ApiException(code, msg)
 
-def item_count(def_val=10, max_val=50):
+def item_count(def_val=1, max_val=50):
     count = request.values.get('item_count')
     if count:
         try:
@@ -66,7 +66,6 @@ def next_start(def_val= 0):
             page = int(page)
         except:
             page = 0
-        page = page <= 0 and def_val
     else:
         page = def_val
     return page*item_count()

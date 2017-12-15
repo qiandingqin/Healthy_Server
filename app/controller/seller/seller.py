@@ -28,8 +28,8 @@ def my_clients():
     """
     code = 0
     try:
-        members = users.find({'type': 0, "apply_status": 1}).limit(item_count()).skip(next_start()).sort("timed")
-    except enumerate:
+        members = users.find({'type': 0, "apply_status": 1, "status": 0}).limit(item_count()).skip(next_start()).sort("timed")
+    except:
         code = -1
     data = []
     for mem in members:
@@ -73,6 +73,8 @@ def recipes(user_id):
     code = 0
     try:
         DB.recipes.insert_one(recipe)
+        #修改用户信息的配餐时间
+        users.update_one({"_id": user_id, "is_report": timestamp()})
     except:
         code = -1
     return apiresult(None, code)
