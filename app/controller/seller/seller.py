@@ -253,10 +253,9 @@ def sell_dietetic_daily(user_id):
 def sell_comprehensive_daily(user_id):
     """
        @api {GET} /seller/sell_comprehensive_daily/<user_id>/ 10. 获取用户综合日报列表信息
-       @apiGroup U_用户_USER
+       @apiGroup S_商家_Seller
        @apiVersion 1.0.0
        @apiPermission 访问授权
-       @apiParam {str} user_id 用户ID
        @apiParam {str} next_start 分页起始ID 默认值: null
        @apiSuccessExample {json} JSON.result 对象
        {
