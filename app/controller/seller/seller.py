@@ -5,6 +5,7 @@ from conf.config import users,recipes,DB
 from app.controller.common import apiresult,timestamp,item_count,next_start
 import bson
 from bson.json_util import dumps
+import pymongo
 
 model = Blueprint('seller', __name__)
 
@@ -28,7 +29,7 @@ def my_clients():
     """
     code = 0
     try:
-        members = users.find({'type': 0, "apply_status": 1, "status": 0}).limit(item_count()).skip(next_start()).sort("timed")
+        members = users.find({'type': 0, "apply_status": 1, "status": 0}).limit(item_count()).skip(next_start()).sort("timed", pymongo.DESCENDING)
     except:
         code = -1
     data = []
@@ -60,9 +61,9 @@ def recipes(user_id):
     """
     if not user_id:
         return "请求参数错误"
-    user = users.find_one({"_id": user_id,"type": 0,"apply_status": 1})
+    user = users.find_one({"_id": user_id, "type": 0, "apply_status": 1})
     if not user:
-        return "该用户不存在或还不是你的会员"
+        return "该用户不存在或还不是您的会员"
     content = request.form.get("content")
     recipe = {
         "_id": bson.objectid.ObjectId().__str__(),
@@ -99,7 +100,7 @@ def apply_clients():
     lists = []
     code = 0
     try:
-        list = users.find({"type": 0, "apply_status": 0}).limit(item_count()).skip(next_start()).sort("timed")
+        list = users.find({"type": 0, "apply_status": 0}).limit(item_count()).skip(next_start()).sort("timed",pymongo.DESCENDING)
         for user in list:
             us = {}
             us['_id'] = user['_id']
@@ -108,11 +109,11 @@ def apply_clients():
             lists.append(us)
     except:
         code = -1
-    data = {"apply_clients":lists}
-    return apiresult(data,code)
+    data = {"apply_clients": lists}
+    return apiresult(data, code)
 
 
-@model.route("/seller/apply_clients_info/<string:user_id>/",methods=['get'])
+@model.route("/seller/apply_clients_info/<string:user_id>/", methods=['get'])
 def apply_clients_info(user_id):
     """
        @api {get} /seller/apply_clients_info/<user_id>/ 06. 获取用户详细信息
@@ -147,7 +148,7 @@ def apply_clients_info(user_id):
     return apiresult(data, code)
 
 
-@model.route('/seller/create_apply/<string:user_id>/',methods=['POST'])
+@model.route('/seller/create_apply/<string:user_id>/', methods=['POST'])
 def create_apply(user_id):
     """
       @api {POST} /seller/create_apply/<user_id>/ 07. 操作用户申请
@@ -162,15 +163,17 @@ def create_apply(user_id):
     """
     if not user_id:
         return "请求参数错误"
-    user = users.find_one({"_id":user_id});
+    user = users.find_one({"_id": user_id});
     code = 0
     if not user:
         return "该用户不存在"
+    elif user["apply_status"] == 1:
+        return "该用户已是你的会员，请不要重复操作"
     try:
-        users.update_one({"_id":user_id,"apply_status":1})
+        users.update_one({"_id": user_id}, {"$set": {"apply_status": 1}})
     except:
         code = -1
-    apiresult(None,code)
+    return apiresult(None, code)
 
 @model.route('/seller/user_recipes/<string:user_id>/')
 def user_recipes(user_id):
@@ -198,7 +201,7 @@ def user_recipes(user_id):
     code = 0
     lists = []
     try:
-        lists = DB.recipes.find({"user_id",user_id}).limit(item_count()).skip(next_start()).sort("timed")
+        lists = DB.recipes.find({"user_id": user_id}).limit(item_count()).skip(next_start()).sort("timed", pymongo.DESCENDING)
     except:
         code = -1
     list = []
@@ -208,7 +211,7 @@ def user_recipes(user_id):
         reci['content'] = rec['content']
         reci['timed'] = rec['timed']
         list.append(reci)
-    apiresult({"today_recipes":list},code)
+    return apiresult({"today_recipes": list}, code)
 
 @model.route('/seller/sell_dietetic_daily/<string:user_id>/')
 def sell_dietetic_daily(user_id):
@@ -234,7 +237,7 @@ def sell_dietetic_daily(user_id):
     code = 0
     lists = []
     try:
-        lists = DB.dietetic_daily.find({"user_id",user_id}).limit(item_count()).skip(next_start()).sort("timed")
+        lists = DB.dietetic_daily.find({"user_id": user_id}).limit(item_count()).skip(next_start()).sort("timed", pymongo.DESCENDING)
     except:
         code = -1
     list = []
@@ -243,7 +246,7 @@ def sell_dietetic_daily(user_id):
         reci['_id'] = rec['_id']
         reci['timed'] = rec['timed']
         list.append(reci)
-    apiresult({"dietetic_daily":list},code)
+    return apiresult({"dietetic_daily": list}, code)
 
 
 @model.route('/seller/sell_comprehensive_daily/<string:user_id>/')
@@ -271,26 +274,27 @@ def sell_comprehensive_daily(user_id):
         return "请求参数不能为空"
     lists = []
     code = 0
+    result = {}
     try:
-        list = DB.comprehensive_daily.find({"user_id": user_id}).limit(item_count()).skip(next_start()).sort("timed")
+        list = DB.comprehensive_daily.find({"user_id": user_id}).limit(item_count()).skip(next_start()).sort("timed", pymongo.DESCENDING)
         user = users.find_one({"_id": user_id})
-        today_weight = {}
         for comprehen in list:
-            today_weight['today_weight'] = user['weight']
             com = {}
             com['_id'] = comprehen['_id']
             com['weight'] = comprehen['weight']
-            if comprehen['weight'] & user['weight']:
+            if comprehen['weight'] and user['weight']:
                 com['arrange_weight'] = comprehen['weight'] - user['weight']
             else:
                 com['arrange_weight'] = 0
             com['timed'] = comprehen['timed']
             lists.append(com)
-        if user['weight'] & today_weight['today_weight']:
-            arrange_weight = today_weight['today_weight'] - user['weight']
+        if user:
+            if user['weight'] and user['local_weight']:
+                arrange_weight = user['local_weight'] - user['weight']
         else:
             arrange_weight = 0
-        result = {"local_weight": user['weight'], "arrange_weight": arrange_weight, "today_weight": user['weight'], "comprehensive": lists}
+        result = {"local_weight": user['local_weight'], "arrange_weight": arrange_weight, "today_weight": user['weight'], "comprehensive": lists}
     except:
         code = -1
+
     return apiresult(result, code)
