@@ -76,7 +76,7 @@ def recipes(user_id):
     try:
         recipe_data = DB.recipes.find_one(filter={"day": tim, "user_id": user_id}, projection={"_id": 1})
         if recipe_data:
-            DB.recipes.update_one({"day": tim}, {"$set": {"content": content, "timed": timestamp()}})
+            DB.recipes.update_one({"day": tim, "user_id": user_id}, {"$set": {"content": content, "timed": timestamp()}})
         else:
             DB.recipes.insert_one(recipe)
         #修改用户信息的配餐时间
