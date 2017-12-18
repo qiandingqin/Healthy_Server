@@ -74,7 +74,7 @@ def recipes(user_id):
     }
     code = 0
     try:
-        recipe_data = DB.recipes.find_one(filter={"day": tim}, projection={"_id": 1})
+        recipe_data = DB.recipes.find_one(filter={"day": tim, "user_id": user_id}, projection={"_id": 1})
         if recipe_data:
             DB.recipes.update_one({"day": tim}, {"$set": {"content": content, "timed": timestamp()}})
         else:
