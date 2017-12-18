@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from flask import Blueprint, request, g, render_template, session, redirect, url_for
-from conf.config import appID,appsecret
+from conf.config import appID,appsecret, DB
 import requests, time, json, hashlib
 from flask import jsonify, json, request, current_app, make_response
 import datetime, time
@@ -86,4 +86,13 @@ def find(find,code=0):
         "result": find
     }
     return jsonify(datas)
+
+def update_data(data={}):
+    if data.__len__() == 0:
+        return jsonify({"code": -1, "msg": "编辑失败"})
+    else:
+        for key in data.keys():
+            if data[key] == None or data[key].__len__() == 0:
+                del(data[key])
+    return data
 
