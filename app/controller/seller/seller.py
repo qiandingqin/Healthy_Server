@@ -168,7 +168,7 @@ def create_apply(user_id):
     """
     if not user_id:
         return "请求参数错误"
-    user = DB.users.find_one(filter={"_id": user_id}, projection={"_id": 1})
+    user = DB.users.find_one(filter={"_id": user_id}, projection={"_id": 1, "apply_status": 1})
     code = 0
     if not user:
         return "该用户不存在"
