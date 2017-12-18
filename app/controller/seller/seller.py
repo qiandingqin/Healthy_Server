@@ -3,7 +3,7 @@
 from flask import Blueprint, request, session, render_template,jsonify,json
 from conf.config import users,recipes,DB
 from app.controller.common import apiresult,timestamp,item_count,next_start
-import bson
+import bson,time
 from bson.json_util import dumps
 import pymongo
 
@@ -53,7 +53,6 @@ def recipes(user_id):
       @apiGroup S_商家_Seller
       @apiVersion 1.0.0
       @apiPermission 访问授权
-      @apiParam {str} user_id 用户ID
       @apiParam {str} content 食谱内容
       @apiSuccessExample {json} JSON.result 对象
       {
@@ -65,17 +64,23 @@ def recipes(user_id):
     if not user:
         return "该用户不存在或还不是您的会员"
     content = request.form.get("content")
+    tim = int(time.strftime('%Y%m%d', time.localtime(time.time())))
     recipe = {
         "_id": bson.objectid.ObjectId().__str__(),
         "user_id": user_id,
         "content": content,
-        "timed": timestamp()
+        "timed": timestamp(),
+        "day": tim
     }
     code = 0
     try:
-        DB.recipes.insert_one(recipe)
+        recipe_data = DB.recipes.find_one(filter={"day": tim}, projection={"_id": 1})
+        if recipe_data:
+            DB.recipes.update_one({"day": tim}, {"$set": {"content": content, "timed": timestamp()}})
+        else:
+            DB.recipes.insert_one(recipe)
         #修改用户信息的配餐时间
-        users.update_one({"_id": user_id, "is_report": timestamp()})
+        users.update_one({"_id": user_id}, {"$set": {"is_report": timestamp()}})
     except:
         code = -1
     return apiresult(None, code)
