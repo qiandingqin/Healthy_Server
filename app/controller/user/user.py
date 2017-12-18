@@ -120,7 +120,7 @@ def dietetic_daily_list():
         return jsonify({"code": -10001, "mag": "参数错误"})
     user_id = "5a30d3694aee3086ea6d7c29"
     # user_id = session["user_id"]
-    find_all = DB.dietetic_daily.find({"user_id": user_id, "status": 0}).skip(next_start).limit(10)
+    find_all = DB.dietetic_daily.find(filter={"user_id": user_id, "status": 0}, projection={"id": 1, "timed": 1}).skip(next_start).limit(10).sort("timed", pymongo.DESCENDING)
     return common.findAll(find_all)
 
 @model.route("/user/create/dietetic_daily/", methods=['post'])
@@ -284,7 +284,7 @@ def user_comprehensive_daily():
         return "参数错误"
     user_id = "5a30d3694aee3086ea6d7c29"
     # user_id = session["user_id"]
-    find_all = DB.comprehensive_daily.find({"user_id": user_id}).skip(next_start).limit(10).sort("timed", pymongo.ASCENDING)
+    find_all = DB.comprehensive_daily.find({"user_id": user_id}).skip(next_start).limit(10).sort("timed", pymongo.DESCENDING)
     data = []
     if find_all:
         user_infos = DB.users.find_one({"_id": user_id})
@@ -491,8 +491,8 @@ def update_user():
         "sex": request.form.get("sex"),
         "phone": request.form.get("phone") or "",
         "height": request.form.get("height"),
-        "local_weight": request.form.get("local_weight"),
-        "local_waist": request.form.get("local_waist"),
+        "local_weight": int(request.form.get("local_weight")),
+        "local_waist": int(request.form.get("local_waist")),
         "age": request.form.get("age"),
         "avatar": request.form.get("avatar") or "",
         "name": request.form.get("name") or "",
