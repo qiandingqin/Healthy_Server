@@ -488,12 +488,12 @@ def update_user():
     # user_id = session["user_id"],
     user_id = "5a30d3694aee3086ea6d7c29",
     data = {
-        "sex": request.form.get("sex"),
+        "sex": int(request.form.get("sex")),
         "phone": request.form.get("phone") or "",
-        "height": request.form.get("height"),
+        "height": int(request.form.get("height")),
         "local_weight": int(request.form.get("local_weight")),
         "local_waist": int(request.form.get("local_waist")),
-        "age": request.form.get("age"),
+        "age": int(request.form.get("age")),
         "avatar": request.form.get("avatar") or "",
         "name": request.form.get("name") or "",
         "address": request.form.get("address"),
@@ -506,6 +506,22 @@ def update_user():
         return jsonify({"code": -1, "msg": "数据编辑失败"})
 
 
+
+@model.route("/user/not_founts")
+def not_founts():
+    if "user_id" in session:
+        user_id = session["user_id"]
+        if user_id == None:
+            return render_template("not_found.html")
+        else:
+            user_info = DB.users.find_one({"_id": user_id})
+            if user_info != None:
+                if user_info["type"] == 1:
+                    return render_template("index/index_admin.html")
+                else:
+                    return render_template("index/index.html")
+    else:
+        return render_template("not_found.html")
 # @model.route('/user/update_date/', methods= ['post'])
 # def uodate_data():
 #     data = {
@@ -520,5 +536,8 @@ def update_user():
 #             if data[key].__len__() == 0:
 #                 del(data[key])
 #     return jsonify(data)
+
+
+
 
 
