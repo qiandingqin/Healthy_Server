@@ -74,9 +74,9 @@ def recipes(user_id):
     }
     code = 0
     try:
-        recipe_data = DB.recipes.find_one(filter={"day": tim}, projection={"_id": 1})
+        recipe_data = DB.recipes.find_one(filter={"day": tim, "user_id": user_id}, projection={"_id": 1})
         if recipe_data:
-            DB.recipes.update_one({"day": tim}, {"$set": {"content": content, "timed": timestamp()}})
+            DB.recipes.update_one({"day": tim, "user_id": user_id}, {"$set": {"content": content, "timed": timestamp()}})
         else:
             DB.recipes.insert_one(recipe)
         #修改用户信息的配餐时间
@@ -105,7 +105,7 @@ def apply_clients():
     lists = []
     code = 0
     try:
-        list = users.find({"type": 0, "apply_status": 0}).limit(item_count()).skip(next_start()).sort("timed",pymongo.DESCENDING)
+        list = users.find({"type": 0, "apply_status": 0}).limit(item_count()).skip(next_start()).sort("timed", pymongo.DESCENDING)
         for user in list:
             us = {}
             us['_id'] = user['_id']
@@ -168,7 +168,7 @@ def create_apply(user_id):
     """
     if not user_id:
         return "请求参数错误"
-    user = DB.users.find_one(filter={"_id": user_id}, projection={"_id": 1})
+    user = DB.users.find_one(filter={"_id": user_id}, projection={"_id": 1, "apply_status": 1})
     code = 0
     if not user:
         return "该用户不存在"
