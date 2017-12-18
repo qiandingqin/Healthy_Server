@@ -288,12 +288,12 @@ def user_comprehensive_daily():
     data = []
     if find_all:
         user_infos = DB.users.find_one({"_id": user_id})
-        local_weight = user_infos["local_weight"]
-        new_weight = user_infos["weight"]
+        local_weight = int(user_infos["local_weight"])
+        new_weight = int(user_infos["weight"])
         arrange_weight = local_weight - new_weight
         for find_key in find_all:
             # 计算体重变化
-            arrange_weight = local_weight - find_key["weight"]
+            arrange_weight = local_weight - int(find_key["weight"])
             datas = {
                 "_id": find_key["_id"],
                 "weight": find_key["weight"],
@@ -490,13 +490,16 @@ def update_user():
     data = {
         "sex": request.form.get("sex"),
         "phone": request.form.get("phone") or "",
-        "local_weight": request.form.get("height"),
+        "height": request.form.get("height"),
+        "local_weight": request.form.get("local_weight"),
         "local_waist": request.form.get("local_waist"),
         "age": request.form.get("age"),
         "avatar": request.form.get("avatar") or "",
         "name": request.form.get("name") or "",
+        "address": request.form.get("address"),
     }
-    updates = DB.users.update_one({"_id": "5a30d3694aee3086ea6d7c29"}, {"$set": common.update_data(data)})
+    datas = common.update_data(data)
+    updates = DB.users.update_one({"_id": "5a30d3694aee3086ea6d7c29"}, {"$set": datas})
     if updates.matched_count > 0:
         return jsonify({"code": 0, "msg": "数据编辑成功"})
     else:
