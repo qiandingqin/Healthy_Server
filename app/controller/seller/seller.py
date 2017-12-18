@@ -147,7 +147,7 @@ def apply_clients_info(user_id):
     data = {}
     code = 0
     try:
-        data = users.find_one(filter={"_id": user_id}, projection={"_id": 1, "name": 1, "phone": 1, "avatar": 1, "sex": 1,"apply_weight": 1, "estimated_times": 1, "age": 1, "height": 1,"weight": 1, "assessment": 1, "sport": 1})
+        data = users.find_one(filter={"_id": user_id}, projection={"_id": 1, "name": 1, "phone": 1, "avatar": 1, "sex": 1, "apply_weight": 1, "estimated_times": 1, "age": 1, "height": 1, "weight": 1, "assessment": 1, "sport": 1})
     except:
         code = -1
     return apiresult(data, code)
@@ -286,7 +286,7 @@ def sell_comprehensive_daily(user_id):
             com = {}
             com['_id'] = comprehen['_id']
             com['weight'] = comprehen['weight']
-            if comprehen['weight'] and user['weight']:
+            if "weight" in comprehen and "weight" in user:
                 com['arrange_weight'] = comprehen['weight'] - user['weight']
             else:
                 com['arrange_weight'] = float(0)
@@ -297,7 +297,6 @@ def sell_comprehensive_daily(user_id):
             if ("weight" in user) and ("local_weight" in user):
                 arrange_weight = user['local_weight'] - user['weight']
                 result = {"local_weight": user['local_weight'], "arrange_weight": arrange_weight, "today_weight": user['weight'], "comprehensive": lists}
-            result = {"local_weight": float(0), "arrange_weight": arrange_weight, "today_weight": user['weight'], "comprehensive": lists}
         else:
             result = {"local_weight": float(0), "arrange_weight": arrange_weight, "today_weight": float(0), "comprehensive": lists}
     except:
