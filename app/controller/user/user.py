@@ -462,12 +462,21 @@ def files_upload():
        }
     """
     abpath = os.path.abspath('./upload/')
-    for upload in request.files.getlist("file"):
-        file_name = upload.filename.rsplit("/")[0]
-        destination = "/".join([abpath, file_name])
-        upload.save(str(destination))
-        result = {"file_name": file_name, "destination": destination}
-    return jsonify({"code": 0, "filename": result})
+    if os.path.isdir('./upload/') == False:
+        os.mkdir('./upload/')
+        for upload in request.files.getlist("file"):
+            file_name = upload.filename.rsplit("/")[0]
+            destination = "/".join([abpath, file_name])
+            upload.save(str(destination))
+            result = {"file_name": file_name, "destination": destination}
+        return jsonify({"code": 0, "filename": result})
+    else:
+        for upload in request.files.getlist("file"):
+            file_name = upload.filename.rsplit("/")[0]
+            destination = "/".join([abpath, file_name])
+            upload.save(str(destination))
+            result = {"file_name": file_name, "destination": destination}
+        return jsonify({"code": 0, "filename": result})
 
 @model.route('/user/update_user/', methods= ['post'])
 def update_user():
@@ -537,6 +546,10 @@ def not_founts():
 #                 del(data[key])
 #     return jsonify(data)
 
+
+@model.route('/a')
+def uodate_data():
+    return render_template("upload.html")
 
 
 
