@@ -105,7 +105,7 @@ def apply_clients():
     lists = []
     code = 0
     try:
-        list = users.find({"type": 0, "apply_status": 0}).limit(item_count()).skip(next_start()).sort("timed",pymongo.DESCENDING)
+        list = users.find({"type": 0, "apply_status": 0}).limit(item_count()).skip(next_start()).sort("timed", pymongo.DESCENDING)
         for user in list:
             us = {}
             us['_id'] = user['_id']
