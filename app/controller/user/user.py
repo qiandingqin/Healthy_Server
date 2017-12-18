@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from flask import Blueprint, request, session, g, render_template,jsonify
 from conf.config import appID,appsecret, users, dietetic_daily, comprehensive_daily, recipes, DB
-import bson,time, json, os
+import bson,time, json, os, pymongo
 from bson.json_util import dumps
 from app.controller import common
 from datetime import datetime
@@ -90,7 +90,7 @@ def today_recipes():
         return jsonify({"code": -10001, "mag": "参数错误"})
     # user_id = session["user_id"]
     user_id = "5a30d8954aee308711f1cfa2"
-    find_all = recipes.find({"user_id": user_id or ""}).skip(next_start).limit(10)
+    find_all = recipes.find({"user_id": "5a30d8954aee308711f1cfa2"}).skip(next_start).limit(10).sort("day", pymongo.ASCENDING)
     return common.findAll(find_all)
 
 
@@ -279,8 +279,28 @@ def user_comprehensive_daily():
         return "参数错误"
     user_id = "5a30d8954aee308711f1cfa2"
     # user_id = session["user_id"]
-    find_all = DB.comprehensive_daily.find({"user_id": user_id}).skip(next_start).limit(10)
-    return common.findAll(find_all)
+    find_all = DB.comprehensive_daily.find({"user_id": user_id}).skip(next_start).limit(10).sort("timed", pymongo.ASCENDING)
+    data = []
+    if find_all:
+        user_infos = DB.users.find_one({"_id": user_id})
+        local_weight = user_infos["local_weight"]
+        new_weight = user_infos["weight"]
+        arrange_weight = local_weight - new_weight
+        for find_key in find_all:
+            # 计算体重变化
+            arrange_weight = local_weight - find_key["weight"]
+            datas = {
+                "_id": find_key["_id"],
+                "images": find_key["images"],
+                "waist": find_key["waist"],
+                "weight": find_key["weight"],
+                "arrange_weight": arrange_weight,
+                "local_weight": local_weight,
+            }
+            data.append(datas)
+        datas = data
+        app_data = {"code": 0, "local_weight": local_weight, "today_weight": new_weight, "arrange_weight": arrange_weight, "comprehensive": datas}
+        return jsonify(app_data)
 
 
 
@@ -389,7 +409,7 @@ def obesity_test():
             standard = "中度肥胖"
         elif Result >= 35:
             standard = "重度肥胖"
-        update = DB.users.update_one({"_id": user_id}, {"$set": {"assessment": standard}})
+        update = DB.users.update_one({"_id": "5a30d8954aee308711f1cfa2"}, {"$set": {"assessment": standard}})
         if update.matched_count > 0:
             return jsonify({"assessment": standard, "weight": int(request.form.get("weight"))})
         else:
