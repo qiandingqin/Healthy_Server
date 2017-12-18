@@ -67,14 +67,14 @@ def index():
             set_data = users.insert_one(data)
             if set_data.inserted_id:
                 session["user_id"] = set_data.inserted_id
-                return "普通用户页面"
+                return render_template('index/index.html')
         else:
             type = user_data["type"]
             session["user_id"] = user_data["_id"]
             if int(type) == 0:
-                return "普通用户页面"
+                return render_template("index/index.html")
             elif int(type) == 1:
-                return "商家页面"
+                return render_template("index/index_admin.html")
 
 
 
