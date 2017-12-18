@@ -89,8 +89,8 @@ def today_recipes():
     else:
         return jsonify({"code": -10001, "mag": "参数错误"})
     # user_id = session["user_id"]
-    user_id = "5a30d8954aee308711f1cfa2"
-    find_all = recipes.find({"user_id": "5a30d8954aee308711f1cfa2"}).skip(next_start).limit(10).sort("day", pymongo.ASCENDING)
+    user_id = "5a30d3694aee3086ea6d7c29"
+    find_all = recipes.find({"user_id": "5a30d3694aee3086ea6d7c29"}).skip(next_start).limit(10).sort("day", pymongo.ASCENDING)
     return common.findAll(find_all)
 
 
@@ -118,7 +118,7 @@ def dietetic_daily_list():
         next_start = int(request.args.get('next_start'))*10
     else:
         return jsonify({"code": -10001, "mag": "参数错误"})
-    user_id = "5a30d8954aee308711f1cfa2"
+    user_id = "5a30d3694aee3086ea6d7c29"
     # user_id = session["user_id"]
     find_all = DB.dietetic_daily.find({"user_id": user_id, "status": 0}).skip(next_start).limit(10)
     return common.findAll(find_all)
@@ -138,7 +138,7 @@ def dietetic_daily():
        }
     """
     # "user_id": session["user_id"],
-    user_id = "5a30d8954aee308711f1cfa2"
+    user_id = "5a30d3694aee3086ea6d7c29"
     type = int(request.form.get("type"))
     if type == None or (type >= 3):
         return jsonify({"code": -1001, "msg": "用餐类别异常"})
@@ -245,8 +245,13 @@ def dietetic_daily_info(diet_id):
         return "参数错误"
     # user_id = session["user_id"]
     find = DB.dietetic_daily.find_one({"_id": diet_ids, "status": 0})
-    find['dietetics'] = sorted(find['dietetics'], cmp=sorts, reverse=False)
-    return common.find(find)
+    if find != None:
+        find['dietetics'] = sorted(find['dietetics'], cmp=sorts, reverse=False)
+        data = {"dietetics": find['dietetics']}
+        return common.find(data)
+    else:
+        return jsonify({"code": -1, "result": []})
+
 
 def sorts(a, b):
     return a['type']-b['type']
@@ -277,32 +282,29 @@ def user_comprehensive_daily():
         next_start = int(request.args.get('next_start'))*10
     else:
         return "参数错误"
-    user_id = "5a30d8954aee308711f1cfa2"
+    user_id = "5a30d3694aee3086ea6d7c29"
     # user_id = session["user_id"]
     find_all = DB.comprehensive_daily.find({"user_id": user_id}).skip(next_start).limit(10).sort("timed", pymongo.ASCENDING)
     data = []
     if find_all:
         user_infos = DB.users.find_one({"_id": user_id})
-        local_weight = user_infos["local_weight"]
-        new_weight = user_infos["weight"]
+        local_weight = int(user_infos["local_weight"])
+        new_weight = int(user_infos["weight"])
         arrange_weight = local_weight - new_weight
         for find_key in find_all:
             # 计算体重变化
-            arrange_weight = local_weight - find_key["weight"]
+            arrange_weight = local_weight - int(find_key["weight"])
             datas = {
                 "_id": find_key["_id"],
-                "images": find_key["images"],
-                "waist": find_key["waist"],
                 "weight": find_key["weight"],
                 "arrange_weight": arrange_weight,
                 "local_weight": local_weight,
+                "timed": find_key["timed"],
             }
             data.append(datas)
         datas = data
         app_data = {"code": 0, "local_weight": local_weight, "today_weight": new_weight, "arrange_weight": arrange_weight, "comprehensive": datas}
         return jsonify(app_data)
-
-
 
 @model.route('/user/get/user_comprehensive_info/<string:comprehensive_id>/')
 def user_comprehensive_info(comprehensive_id):
@@ -348,11 +350,11 @@ def add_comprehensive_daily():
        }
     """
     images = ""
-    user_id = "5a30d8954aee308711f1cfa2"
+    user_id = "5a30d3694aee3086ea6d7c29"
     data = {
         "_id": bson.objectid.ObjectId().__str__(),
         # "user_id": session["user_id"],
-        "user_id": "5a30d8954aee308711f1cfa2",
+        "user_id": "5a30d3694aee3086ea6d7c29",
         "weight": float(request.form.get("weight")) or float(0),
         "waist": float(request.form.get("waist")) or float(0),
         "images": {
@@ -387,7 +389,7 @@ def obesity_test():
        }
     """
     # "user_id": session["user_id"],
-    user_id = "5a30d8954aee308711f1cfa2",
+    user_id = "5a30d3694aee3086ea6d7c29",
     weight = request.form.get("weight")
     heights = request.form.get("height")
     if weight and heights:
@@ -409,7 +411,7 @@ def obesity_test():
             standard = "中度肥胖"
         elif Result >= 35:
             standard = "重度肥胖"
-        update = DB.users.update_one({"_id": "5a30d8954aee308711f1cfa2"}, {"$set": {"assessment": standard}})
+        update = DB.users.update_one({"_id": "5a30d3694aee3086ea6d7c29"}, {"$set": {"assessment": standard}})
         if update.matched_count > 0:
             return jsonify({"assessment": standard, "weight": int(request.form.get("weight"))})
         else:
@@ -434,7 +436,7 @@ def apply_free_consultation():
        }
     """
     # "user_id": session["user_id"],
-    user_id = "5a30d8954aee308711f1cfa2",
+    user_id = "5a30d3694aee3086ea6d7c29",
     data = {
         "sex": request.form.get("sex"),
         "age": int(request.form.get("age")),
@@ -484,17 +486,20 @@ def update_user():
        }
     """
     # user_id = session["user_id"],
-    user_id = "5a30d8954aee308711f1cfa2",
+    user_id = "5a30d3694aee3086ea6d7c29",
     data = {
         "sex": request.form.get("sex"),
         "phone": request.form.get("phone") or "",
-        "local_weight": request.form.get("height"),
+        "height": request.form.get("height"),
+        "local_weight": request.form.get("local_weight"),
         "local_waist": request.form.get("local_waist"),
         "age": request.form.get("age"),
         "avatar": request.form.get("avatar") or "",
         "name": request.form.get("name") or "",
+        "address": request.form.get("address"),
     }
-    updates = DB.users.update_one({"_id": "5a30d8954aee308711f1cfa2"}, {"$set": common.update_data(data)})
+    datas = common.update_data(data)
+    updates = DB.users.update_one({"_id": "5a30d3694aee3086ea6d7c29"}, {"$set": datas})
     if updates.matched_count > 0:
         return jsonify({"code": 0, "msg": "数据编辑成功"})
     else:
