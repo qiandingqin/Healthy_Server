@@ -193,7 +193,7 @@ def dietetic_daily():
             dietetic_daily_type = type_detil["type"]
             dietetic_id = type_detil["_id"]
             if dietetic_daily_type == type and dietetic_id:
-                update_dietetic_daily = DB.dietetic_daily.update({"_id": dietetic_daily_id, "user_id": user_id, "day": times, "status": 0, "dietetics.type": dietetic_daily_type}, {"$set": {"dietetics.$": common.update_data(data)}})
+                update_dietetic_daily = DB.dietetic_daily.update({"_id": dietetic_daily_id, "user_id": user_id, "day": times, "status": 0, "dietetics.type": dietetic_daily_type}, {"$set": {"dietetics.$": data}})
                 if update_dietetic_daily != None:
                     # 更新用户表里面的最新饮食日报发布时间，根据时间判断是否已报
                     updates = DB.users.update_one({"_id": user_id}, {"$set": {"diet_timed": time.time()}})
@@ -352,16 +352,22 @@ def add_comprehensive_daily():
     """
     images = ""
     user_id = "5a30d3694aee3086ea6d7c29"
+    images_list = []
+    images = request.form.getlist("images")
+    if images.__len__() > 0:
+        for img in images:
+            imgs = {"url": img, "ratio": float(0)}
+            images_list.append(imgs)
+    else:
+        imgs = {"url": "", "ratio": float(0)}
+        images_list.append(imgs)
     data = {
         "_id": bson.objectid.ObjectId().__str__(),
         # "user_id": session["user_id"],
         "user_id": "5a30d3694aee3086ea6d7c29",
         "weight": float(request.form.get("weight")) or float(0),
         "waist": float(request.form.get("waist")) or float(0),
-        "images": {
-            "url": "阿凡达广发华福感到十分",  # 图片地址
-            "ratio": float(0),  # 图片宽高比
-        },
+        "images":images_list,
         "timed": int(time.time())
     }
     insert_one = DB.comprehensive_daily.insert_one(data)
