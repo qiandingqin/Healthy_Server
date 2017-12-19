@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from flask import Blueprint, request, session, g, render_template,jsonify
 from conf.config import appID,appsecret, users, dietetic_daily, comprehensive_daily, recipes, DB
-import bson,time, json, os, pymongo
+import bson,time, json, os, pymongo, httplib
 from bson.json_util import dumps
 from app.controller import common
 from datetime import datetime
@@ -142,8 +142,15 @@ def dietetic_daily():
     type = int(request.form.get("type"))
     if type == None or (type >= 3):
         return jsonify({"code": -1001, "msg": "用餐类别异常"})
-    images = request.form.getlist("images"),
-
+    images_list = []
+    images = request.form.getlist("images")
+    if images.__len__() > 0:
+        for img in images:
+            imgs = {"url": img, "ratio": float(0)}
+            images_list.append(imgs)
+    else:
+        imgs = {"url": "", "ratio": float(0)}
+        images_list.append(imgs)
     # 通过当天时间戳查询数据库
     times = int(time.strftime('%Y%m%d', time.localtime(time.time())))
     find_one = DB.dietetic_daily.find_one({"day": times, "status": 0, "user_id": user_id})
@@ -155,10 +162,7 @@ def dietetic_daily():
             "dietetics": [{
                 "_id": bson.objectid.ObjectId().__str__(),
                 "content": request.form.get("content"),
-                "images": [{
-                        "url": "sdfghhgfdssdfghgfd",  # 图片地址
-                        "ratio": float(0),  # 图片宽高比
-                    }],
+                "images": images_list,
                 "timed": int(time.time()),
                 "type": type,
             }],
@@ -180,10 +184,7 @@ def dietetic_daily():
         data = {
             "_id": bson.objectid.ObjectId().__str__(),
             "content": request.form.get("content"),
-            "images": [{
-                "url": "wert",  # 图片地址
-                "ratio": float(0),  # 图片宽高比
-            }],
+            "images": images_list,
             "timed": int(time.time()),
             "type": type,
         }
@@ -192,7 +193,7 @@ def dietetic_daily():
             dietetic_daily_type = type_detil["type"]
             dietetic_id = type_detil["_id"]
             if dietetic_daily_type == type and dietetic_id:
-                update_dietetic_daily = DB.dietetic_daily.update({"_id": dietetic_daily_id, "user_id": user_id, "day": times, "status": 0, "dietetics.type": dietetic_daily_type}, {"$set": {"dietetics.$": data}})
+                update_dietetic_daily = DB.dietetic_daily.update({"_id": dietetic_daily_id, "user_id": user_id, "day": times, "status": 0, "dietetics.type": dietetic_daily_type}, {"$set": {"dietetics.$": common.update_data(data)}})
                 if update_dietetic_daily != None:
                     # 更新用户表里面的最新饮食日报发布时间，根据时间判断是否已报
                     updates = DB.users.update_one({"_id": user_id}, {"$set": {"diet_timed": time.time()}})
@@ -461,22 +462,27 @@ def files_upload():
        {
        }
     """
-    abpath = os.path.abspath('./upload/')
-    if os.path.isdir('./upload/') == False:
-        os.mkdir('./upload/')
+    # files = request.files.getlist("file")
+
+    abpath = os.path.abspath('./app/static/upload/')
+    file_data = []
+    if os.path.isdir('./app/static/upload/') == False:
+        os.mkdir("./app/static/upload/")
         for upload in request.files.getlist("file"):
             file_name = upload.filename.rsplit("/")[0]
             destination = "/".join([abpath, file_name])
             upload.save(str(destination))
-            result = {"file_name": file_name, "destination": destination}
-        return jsonify({"code": 0, "filename": result})
+            result = {"file_name": file_name, "destination": "upload/"+file_name}
+            file_data.append(result)
+        return jsonify({"code": 0, "filename": file_data})
     else:
         for upload in request.files.getlist("file"):
             file_name = upload.filename.rsplit("/")[0]
             destination = "/".join([abpath, file_name])
-            upload.save(str(destination))
-            result = {"file_name": file_name, "destination": destination}
-        return jsonify({"code": 0, "filename": result})
+            upload.save(destination)
+            result = {"file_name": file_name, "destination": "upload/"+file_name}
+            file_data.append(result)
+        return jsonify({"code": 0, "filename": file_data})
 
 @model.route('/user/update_user/', methods= ['post'])
 def update_user():
@@ -496,16 +502,17 @@ def update_user():
     """
     # user_id = session["user_id"],
     user_id = "5a30d3694aee3086ea6d7c29",
+
     data = {
-        "sex": int(request.form.get("sex")),
+        "sex": request.form.get("sex") and int(request.form.get("sex")) or "",
         "phone": request.form.get("phone") or "",
-        "height": int(request.form.get("height")),
-        "local_weight": int(request.form.get("local_weight")),
-        "local_waist": int(request.form.get("local_waist")),
-        "age": int(request.form.get("age")),
+        "height": request.form.get("height") or "",
+        "local_weight": request.form.get("local_weight") and int(request.form.get("local_weight")) or "",
+        "local_waist": request.form.get("local_waist") and int(request.form.get("local_waist")) or "",
+        "age": request.form.get("age") and int(request.form.get("age")) or "",
         "avatar": request.form.get("avatar") or "",
         "name": request.form.get("name") or "",
-        "address": request.form.get("address"),
+        "address": request.form.get("address") or "",
     }
     datas = common.update_data(data)
     updates = DB.users.update_one({"_id": "5a30d3694aee3086ea6d7c29"}, {"$set": datas})
