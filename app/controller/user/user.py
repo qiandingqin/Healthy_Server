@@ -450,14 +450,18 @@ def apply_free_consultation():
     """
     # "user_id": session["user_id"],
     user_id = "5a30d3694aee3086ea6d7c29",
-    if request.form.get("estimated_times") and request.form.get("apply_weight") and request.form.get("name") and request.form.get("phone"):
+    estimated_times = request.form.get("estimated_times")
+    apply_weight = request.form.get("apply_weight")
+    name = request.form.get("name")
+    phone = request.form.get("phone")
+    if estimated_times and apply_weight and name and phone:
         data = {
-            "estimated_times": request.form.get("estimated_times") and str(request.form.get("estimated_times")) or "",
-            "apply_weight": request.form.get("apply_weight") and float(request.form.get("apply_weight")) or "",
-            "name": request.form.get("name") and int(request.form.get("name")) or "",
-            "phone": request.form.get("phone") and str(request.form.get("phone")) or ""
+            "estimated_times": estimated_times,
+            "apply_weight": float(apply_weight),
+            "name": name,
+            "phone": phone
             }
-        update = DB.users.update_one({"_id": user_id}, {"$set": common.update_data(data)})
+        update = DB.users.update_one({"_id": "5a30d3694aee3086ea6d7c29"}, {"$set": data})
         if update.matched_count > 0:
             return jsonify({"code": 0, "msg": "数据编辑成功"})
         else:
@@ -518,17 +522,20 @@ def update_user():
     user_id = "5a30d3694aee3086ea6d7c29",
 
     data = {
-        "sex": request.form.get("sex") and int(request.form.get("sex")) or "",
+        "sex": request.form.get("sex") or "",
         "phone": request.form.get("phone") or "",
         "height": request.form.get("height") or "",
-        "local_weight": request.form.get("local_weight") and int(request.form.get("local_weight")) or "",
-        "local_waist": request.form.get("local_waist") and int(request.form.get("local_waist")) or "",
-        "age": request.form.get("age") and int(request.form.get("age")) or "",
+        "local_weight": request.form.get("local_weight") or "",
+        "local_waist": request.form.get("local_waist") or "",
+        "age": request.form.get("age") or "",
         "avatar": request.form.get("avatar") or "",
         "name": request.form.get("name") or "",
-        "address": request.form.get("address") or "",
+        "address": request.form.get("address") or ""
     }
-    datas = common.update_data(data)
+    for key in data.keys():
+        if data[key] == None or data[key] == "":
+            del(data[key])
+    datas = data
     updates = DB.users.update_one({"_id": "5a30d3694aee3086ea6d7c29"}, {"$set": datas})
     if updates.matched_count > 0:
         return jsonify({"code": 0, "msg": "数据编辑成功"})
