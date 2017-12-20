@@ -289,8 +289,11 @@ def user_comprehensive_daily():
     data = []
     if find_all:
         user_infos = DB.users.find_one({"_id": user_id})
+        # 用户原始体重
         local_weight = int(user_infos["local_weight"])
+        # 用户最新的体重（添加综合日报需要更新）
         new_weight = int(user_infos["weight"])
+        # 计算今日体重
         arrange_weight = local_weight - new_weight
         for find_key in find_all:
             # 计算体重变化
@@ -373,7 +376,11 @@ def add_comprehensive_daily():
     insert_one = DB.comprehensive_daily.insert_one(data)
     if insert_one.inserted_id:
         # 更新用户表
-        return jsonify({"code": 0, "msg": "添加数据成功"})
+        update = DB.users.update_one({"_id": "5a30d3694aee3086ea6d7c29"}, {"$set": {"weight": float(request.form.get("weight")) or float(0)}})
+        if update.matched_count > 0:
+            return jsonify({"code": 0, "msg": "添加数据成功"})
+        else:
+            return jsonify({"code": -1, "msg": "添加数据失败"})
     else:
         return jsonify({"code": -1, "msg": "添加数据失败"})
 
@@ -433,29 +440,30 @@ def apply_free_consultation():
        @apiGroup U_用户_USER
        @apiVersion 1.0.0
        @apiPermission 访问授权
-       @apiParam {int} sex 性别
-       @apiParam {int} age 年龄
-       @apiParam {int} height 身高
-       @apiParam {double} weight 体重
-       @apiParam {str} sport 运动量
+       @apiParam {str} estimated_times 预计时间
+       @apiParam {float} apply_weight 申请减重[单位：kg]
+       @apiParam {str} name 姓名
+       @apiParam {str} phone 电话
        @apiSuccessExample {json} JSON.result 对象
        {
        }
     """
     # "user_id": session["user_id"],
     user_id = "5a30d3694aee3086ea6d7c29",
-    data = {
-        "sex": request.form.get("sex"),
-        "age": int(request.form.get("age")),
-        "height": int(request.form.get("height")),
-        "weight": float(request.form.get("double")),
-        "sport": request.form.get("sport")
-        }
-    update = DB.users.update_one({"_id": user_id}, {"$set": common.update_data(data)})
-    if update.matched_count > 0:
-        return jsonify({"code": 0, "msg": "数据编辑成功"})
+    if request.form.get("estimated_times") and request.form.get("apply_weight") and request.form.get("name") and request.form.get("phone"):
+        data = {
+            "estimated_times": request.form.get("estimated_times") and str(request.form.get("estimated_times")) or "",
+            "apply_weight": request.form.get("apply_weight") and float(request.form.get("apply_weight")) or "",
+            "name": request.form.get("name") and int(request.form.get("name")) or "",
+            "phone": request.form.get("phone") and str(request.form.get("phone")) or ""
+            }
+        update = DB.users.update_one({"_id": user_id}, {"$set": common.update_data(data)})
+        if update.matched_count > 0:
+            return jsonify({"code": 0, "msg": "数据编辑成功"})
+        else:
+            return jsonify({"code": -1, "msg": "数据编辑失败"})
     else:
-        return jsonify({"code": -1, "msg": "数据编辑失败"})
+        return jsonify({"code": -1001, "msg": "参数错误"})
 
 @model.route('/user/files_upload/',methods=['post'])
 def files_upload():
