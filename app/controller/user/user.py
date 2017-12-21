@@ -517,7 +517,7 @@ def update_user():
        {
        }
     """
-    user_id = session["user_id"],
+    user_id = session["user_id"]
     # user_id = "5a30d3694aee3086ea6d7c29",
 
     data = {
