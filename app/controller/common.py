@@ -45,7 +45,13 @@ def apiresult(obj=None, code=0, **kwargs):
 def abort(code, msg=None):
     if code == 10000 and not msg:
         msg = '请求的参数错误'
-    # raise ApiException(code, msg)
+    raise ApiException(code, msg)
+
+class ApiException(Exception):
+    def __init__(self, code, msg):
+        self.code = code
+        if msg:
+            self.message = msg
 
 def item_count(def_val=10, max_val=50):
     count = request.values.get('item_count')
