@@ -57,8 +57,8 @@ def user_info():
         }
     """
     try:
-        # user_id = session["user_id"]
-        user_id = str("5a30d3694aee3086ea6d7c29")
+        user_id = session["user_id"]
+        # user_id = str("5a30d3694aee3086ea6d7c29")
         find = users.find_one({"_id": user_id, "status": 0, "type": 0})
         return common.find(find=find)
     except BaseException:
@@ -88,8 +88,8 @@ def today_recipes():
         next_start = int(request.args.get('next_start'))*10
     else:
         return jsonify({"code": -10001, "mag": "参数错误"})
-    # user_id = session["user_id"]
-    user_id = "5a30d3694aee3086ea6d7c29"
+    user_id = session["user_id"]
+    # user_id = "5a30d3694aee3086ea6d7c29"
     find_all = recipes.find({"user_id": "5a30d3694aee3086ea6d7c29"}).skip(next_start).limit(10).sort("day", pymongo.ASCENDING)
     return common.findAll(find_all)
 
@@ -118,8 +118,8 @@ def dietetic_daily_list():
         next_start = int(request.args.get('next_start'))*10
     else:
         return jsonify({"code": -10001, "mag": "参数错误"})
-    user_id = "5a30d3694aee3086ea6d7c29"
-    # user_id = session["user_id"]
+    # user_id = "5a30d3694aee3086ea6d7c29"
+    user_id = session["user_id"]
     find_all = DB.dietetic_daily.find(filter={"user_id": user_id, "status": 0}, projection={"id": 1, "timed": 1}).skip(next_start).limit(10).sort("timed", pymongo.DESCENDING)
     return common.findAll(find_all)
 
@@ -137,8 +137,8 @@ def dietetic_daily():
        {
        }
     """
-    # "user_id": session["user_id"],
-    user_id = "5a30d3694aee3086ea6d7c29"
+    user_id = session["user_id"],
+    # user_id = "5a30d3694aee3086ea6d7c29"
     type = int(request.form.get("type"))
     if type == None or (type >= 3):
         return jsonify({"code": -1001, "msg": "用餐类别异常"})
@@ -283,8 +283,7 @@ def user_comprehensive_daily():
         next_start = int(request.args.get('next_start'))*10
     else:
         return "参数错误"
-    user_id = "5a30d3694aee3086ea6d7c29"
-    # user_id = session["user_id"]
+    user_id = session["user_id"]
     find_all = DB.comprehensive_daily.find({"user_id": user_id}).skip(next_start).limit(10).sort("timed", pymongo.DESCENDING)
     data = []
     if find_all:
@@ -354,7 +353,7 @@ def add_comprehensive_daily():
        }
     """
     images = ""
-    user_id = "5a30d3694aee3086ea6d7c29"
+    user_id = session["user_id"]
     images_list = []
     images = request.form.getlist("images")
     if images.__len__() > 0:
@@ -367,7 +366,7 @@ def add_comprehensive_daily():
     data = {
         "_id": bson.objectid.ObjectId().__str__(),
         # "user_id": session["user_id"],
-        "user_id": "5a30d3694aee3086ea6d7c29",
+        "user_id": user_id,
         "weight": float(request.form.get("weight")) or float(0),
         "waist": float(request.form.get("waist")) or float(0),
         "images":images_list,
@@ -376,7 +375,7 @@ def add_comprehensive_daily():
     insert_one = DB.comprehensive_daily.insert_one(data)
     if insert_one.inserted_id:
         # 更新用户表
-        update = DB.users.update_one({"_id": "5a30d3694aee3086ea6d7c29"}, {"$set": {"weight": float(request.form.get("weight")) or float(0)}})
+        update = DB.users.update_one({"_id": user_id}, {"$set": {"weight": float(request.form.get("weight")) or float(0)}})
         if update.matched_count > 0:
             return jsonify({"code": 0, "msg": "添加数据成功"})
         else:
@@ -402,8 +401,8 @@ def obesity_test():
         ...
        }
     """
-    # "user_id": session["user_id"],
-    user_id = "5a30d3694aee3086ea6d7c29",
+    user_id = session["user_id"]
+    # user_id = "5a30d3694aee3086ea6d7c29",
     weight = request.form.get("weight")
     heights = request.form.get("height")
     if weight and heights:
@@ -425,7 +424,7 @@ def obesity_test():
             standard = "中度肥胖"
         elif Result >= 35:
             standard = "重度肥胖"
-        update = DB.users.update_one({"_id": "5a30d3694aee3086ea6d7c29"}, {"$set": {"assessment": standard}})
+        update = DB.users.update_one({"_id": user_id}, {"$set": {"assessment": standard}})
         if update.matched_count > 0:
             return jsonify({"assessment": standard, "weight": int(request.form.get("weight"))})
         else:
@@ -448,8 +447,8 @@ def apply_free_consultation():
        {
        }
     """
-    # "user_id": session["user_id"],
-    user_id = "5a30d3694aee3086ea6d7c29",
+    user_id = session["user_id"]
+    # user_id = "5a30d3694aee3086ea6d7c29",
     estimated_times = request.form.get("estimated_times")
     apply_weight = request.form.get("apply_weight")
     name = request.form.get("name")
@@ -461,7 +460,7 @@ def apply_free_consultation():
             "name": name,
             "phone": phone
             }
-        update = DB.users.update_one({"_id": "5a30d3694aee3086ea6d7c29"}, {"$set": data})
+        update = DB.users.update_one({"_id": user_id}, {"$set": data})
         if update.matched_count > 0:
             return jsonify({"code": 0, "msg": "数据编辑成功"})
         else:
@@ -518,8 +517,8 @@ def update_user():
        {
        }
     """
-    # user_id = session["user_id"],
-    user_id = "5a30d3694aee3086ea6d7c29",
+    user_id = session["user_id"],
+    # user_id = "5a30d3694aee3086ea6d7c29",
 
     data = {
         "sex": request.form.get("sex") or "",
@@ -536,7 +535,7 @@ def update_user():
         if data[key] == None or data[key] == "":
             del(data[key])
     datas = data
-    updates = DB.users.update_one({"_id": "5a30d3694aee3086ea6d7c29"}, {"$set": datas})
+    updates = DB.users.update_one({"_id": user_id}, {"$set": datas})
     if updates.matched_count > 0:
         return jsonify({"code": 0, "msg": "数据编辑成功"})
     else:
