@@ -286,6 +286,7 @@ def sell_comprehensive_daily(user_id):
              }]
        }
     """
+
     if not user_id:
         return "请求参数不能为空"
     lists = []

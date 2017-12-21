@@ -58,7 +58,7 @@ def user_info():
     """
     try:
         user_id = session["user_id"]
-        # user_id = str("5a30d3694aee3086ea6d7c29")
+        # user_id = str("5a3b562e07f58413a3deca45")
         find = users.find_one({"_id": user_id, "status": 0, "type": 0})
         return common.find(find=find)
     except BaseException:

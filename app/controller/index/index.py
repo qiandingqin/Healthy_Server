@@ -10,6 +10,7 @@ model = Blueprint('index', __name__)
 @model.route('/')
 def put_code():
     uri = urlencode({"url": "http://www.dnanren.cn/indexs"})
+    # uri = urlencode({"url": "http://health.ext.gzhxyc.com/indexs"})
     url_tpl = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=" + str(appID) + "&redirect_uri=" + uri[4:-1] + "&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect"
     return "<script>window.location.href='"+url_tpl+"'</script>"
 
