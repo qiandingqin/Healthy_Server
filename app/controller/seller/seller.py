@@ -1,15 +1,16 @@
 # coding=utf-8
 # -*- coding: utf-8 -*-
-from flask import Blueprint, request, session, render_template,jsonify,json
-from conf.config import users,recipes,DB
-from app.controller.common import apiresult,timestamp,item_count,next_start
-import bson,time
+from flask import Blueprint, request, session, render_template, jsonify, json
+from conf.config import users, recipes, DB
+from app.controller.common import apiresult, timestamp, item_count, next_start
+import bson,time,pymongo
 from bson.json_util import dumps
-import pymongo
+from app.auth.auth import requires_login
 
 model = Blueprint('seller', __name__)
 
 @model.route("/seller/my_clients/", methods= ['post'])
+@requires_login
 def my_clients():
     """
        @api {POST} /seller/my_clients/ 03. 获取我的客户列表
@@ -27,6 +28,8 @@ def my_clients():
             ]
        }
     """
+    if not next_start:
+        return "请求参数错误"
     code = 0
     try:
         members = users.find({'type': 0, "apply_status": 1, "status": 0}).limit(item_count()).skip(next_start()).sort("timed", pymongo.DESCENDING)
@@ -47,6 +50,7 @@ def my_clients():
 
 
 @model.route("/seller/recipes/<string:user_id>/", methods=['post'])
+@requires_login
 def recipes(user_id):
     """
       @api {POST} /seller/recipes/<user_id>/ 04. 商家发布对应会员的食谱
@@ -86,6 +90,7 @@ def recipes(user_id):
     return apiresult(None, code)
 
 @model.route( "/seller/apply_clients/", methods = ['get'])
+@requires_login
 def apply_clients():
     """
       @api {get} /seller/apply_clients/ 05. 获取我的申请用户列表
@@ -119,6 +124,7 @@ def apply_clients():
 
 
 @model.route("/seller/apply_clients_info/<string:user_id>/", methods=['get'])
+@requires_login
 def apply_clients_info(user_id):
     """
        @api {get} /seller/apply_clients_info/<user_id>/ 06. 获取用户详细信息
@@ -154,6 +160,7 @@ def apply_clients_info(user_id):
 
 
 @model.route('/seller/create_apply/<string:user_id>/', methods=['POST'])
+@requires_login
 def create_apply(user_id):
     """
       @api {POST} /seller/create_apply/<user_id>/ 07. 操作用户申请
@@ -161,12 +168,13 @@ def create_apply(user_id):
       @apiVersion 1.0.0
       @apiPermission 访问授权
       @apiParam {str} user_id 用户ID
-      @apiParam {bool} is_agree 是否同意[true=是/false=否]
+      @apiParam {bool}  is_agree 是否同意[true=是/false=否]
       @apiSuccessExample {json} JSON.result 对象
       {
       }
     """
-    if not user_id:
+    is_agree = request.form['is_agree']
+    if not user_id and not is_agree and is_agree is None:
         return "请求参数错误"
     user = DB.users.find_one(filter={"_id": user_id}, projection={"_id": 1, "apply_status": 1})
     code = 0
@@ -175,12 +183,14 @@ def create_apply(user_id):
     elif user["apply_status"] == 1:
         return "该用户已是你的会员，请不要重复操作"
     try:
-        users.update_one({"_id": user_id}, {"$set": {"apply_status": 1}})
+        print is_agree is True and 1 or -1
+        users.update_one({"_id": user_id}, {"$set": {"apply_status": (is_agree == "true") and 1 or -1}})
     except:
         code = -1
     return apiresult(None, code)
 
 @model.route('/seller/user_recipes/<string:user_id>/')
+@requires_login
 def user_recipes(user_id):
     """
        @api {GET} /seller/user_recipes/<user_id>/ 08. 获取用户食谱列表
@@ -219,6 +229,7 @@ def user_recipes(user_id):
     return apiresult({"today_recipes": list}, code)
 
 @model.route('/seller/sell_dietetic_daily/<string:user_id>/')
+@requires_login
 def sell_dietetic_daily(user_id):
     """
        @api {GET} /seller/sell_dietetic_daily/<user_id>/ 09. 获取用户饮食日报列表
@@ -255,6 +266,7 @@ def sell_dietetic_daily(user_id):
 
 
 @model.route('/seller/sell_comprehensive_daily/<string:user_id>/')
+@requires_login
 def sell_comprehensive_daily(user_id):
     """
        @api {GET} /seller/sell_comprehensive_daily/<user_id>/ 10. 获取用户综合日报列表信息

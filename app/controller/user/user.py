@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from flask import Blueprint, request, session, g, render_template,jsonify
 from conf.config import appID,appsecret, users, dietetic_daily, comprehensive_daily, recipes, DB
-import bson,time, json, os, pymongo
+import bson,time, json, os, pymongo, httplib
 from bson.json_util import dumps
 from app.controller import common
 from datetime import datetime
@@ -57,8 +57,8 @@ def user_info():
         }
     """
     try:
-        # user_id = session["user_id"]
-        user_id = str("5a30d3694aee3086ea6d7c29")
+        user_id = session["user_id"]
+        # user_id = str("5a30d3694aee3086ea6d7c29")
         find = users.find_one({"_id": user_id, "status": 0, "type": 0})
         return common.find(find=find)
     except BaseException:
@@ -88,8 +88,8 @@ def today_recipes():
         next_start = int(request.args.get('next_start'))*10
     else:
         return jsonify({"code": -10001, "mag": "参数错误"})
-    # user_id = session["user_id"]
-    user_id = "5a30d3694aee3086ea6d7c29"
+    user_id = session["user_id"]
+    # user_id = "5a30d3694aee3086ea6d7c29"
     find_all = recipes.find({"user_id": "5a30d3694aee3086ea6d7c29"}).skip(next_start).limit(10).sort("day", pymongo.ASCENDING)
     return common.findAll(find_all)
 
@@ -118,8 +118,8 @@ def dietetic_daily_list():
         next_start = int(request.args.get('next_start'))*10
     else:
         return jsonify({"code": -10001, "mag": "参数错误"})
-    user_id = "5a30d3694aee3086ea6d7c29"
-    # user_id = session["user_id"]
+    # user_id = "5a30d3694aee3086ea6d7c29"
+    user_id = session["user_id"]
     find_all = DB.dietetic_daily.find(filter={"user_id": user_id, "status": 0}, projection={"id": 1, "timed": 1}).skip(next_start).limit(10).sort("timed", pymongo.DESCENDING)
     return common.findAll(find_all)
 
@@ -137,13 +137,20 @@ def dietetic_daily():
        {
        }
     """
-    # "user_id": session["user_id"],
-    user_id = "5a30d3694aee3086ea6d7c29"
+    user_id = session["user_id"]
+    # user_id = "5a30d3694aee3086ea6d7c29"
     type = int(request.form.get("type"))
     if type == None or (type >= 3):
         return jsonify({"code": -1001, "msg": "用餐类别异常"})
-    images = request.form.getlist("images"),
-
+    images_list = []
+    images = request.form.getlist("images")
+    if images.__len__() > 0:
+        for img in images:
+            imgs = {"url": img, "ratio": float(0)}
+            images_list.append(imgs)
+    else:
+        imgs = {"url": "", "ratio": float(0)}
+        images_list.append(imgs)
     # 通过当天时间戳查询数据库
     times = int(time.strftime('%Y%m%d', time.localtime(time.time())))
     find_one = DB.dietetic_daily.find_one({"day": times, "status": 0, "user_id": user_id})
@@ -155,10 +162,7 @@ def dietetic_daily():
             "dietetics": [{
                 "_id": bson.objectid.ObjectId().__str__(),
                 "content": request.form.get("content"),
-                "images": [{
-                        "url": "sdfghhgfdssdfghgfd",  # 图片地址
-                        "ratio": float(0),  # 图片宽高比
-                    }],
+                "images": images_list,
                 "timed": int(time.time()),
                 "type": type,
             }],
@@ -180,10 +184,7 @@ def dietetic_daily():
         data = {
             "_id": bson.objectid.ObjectId().__str__(),
             "content": request.form.get("content"),
-            "images": [{
-                "url": "wert",  # 图片地址
-                "ratio": float(0),  # 图片宽高比
-            }],
+            "images": images_list,
             "timed": int(time.time()),
             "type": type,
         }
@@ -282,14 +283,16 @@ def user_comprehensive_daily():
         next_start = int(request.args.get('next_start'))*10
     else:
         return "参数错误"
-    user_id = "5a30d3694aee3086ea6d7c29"
-    # user_id = session["user_id"]
+    user_id = session["user_id"]
     find_all = DB.comprehensive_daily.find({"user_id": user_id}).skip(next_start).limit(10).sort("timed", pymongo.DESCENDING)
     data = []
     if find_all:
         user_infos = DB.users.find_one({"_id": user_id})
+        # 用户原始体重
         local_weight = int(user_infos["local_weight"])
+        # 用户最新的体重（添加综合日报需要更新）
         new_weight = int(user_infos["weight"])
+        # 计算今日体重
         arrange_weight = local_weight - new_weight
         for find_key in find_all:
             # 计算体重变化
@@ -350,23 +353,33 @@ def add_comprehensive_daily():
        }
     """
     images = ""
-    user_id = "5a30d3694aee3086ea6d7c29"
+    user_id = session["user_id"]
+    images_list = []
+    images = request.form.getlist("images")
+    if images.__len__() > 0:
+        for img in images:
+            imgs = {"url": img, "ratio": float(0)}
+            images_list.append(imgs)
+    else:
+        imgs = {"url": "", "ratio": float(0)}
+        images_list.append(imgs)
     data = {
         "_id": bson.objectid.ObjectId().__str__(),
         # "user_id": session["user_id"],
-        "user_id": "5a30d3694aee3086ea6d7c29",
+        "user_id": user_id,
         "weight": float(request.form.get("weight")) or float(0),
         "waist": float(request.form.get("waist")) or float(0),
-        "images": {
-            "url": "阿凡达广发华福感到十分",  # 图片地址
-            "ratio": float(0),  # 图片宽高比
-        },
+        "images":images_list,
         "timed": int(time.time())
     }
     insert_one = DB.comprehensive_daily.insert_one(data)
     if insert_one.inserted_id:
         # 更新用户表
-        return jsonify({"code": 0, "msg": "添加数据成功"})
+        update = DB.users.update_one({"_id": user_id}, {"$set": {"weight": float(request.form.get("weight")) or float(0)}})
+        if update.matched_count > 0:
+            return jsonify({"code": 0, "msg": "添加数据成功"})
+        else:
+            return jsonify({"code": -1, "msg": "添加数据失败"})
     else:
         return jsonify({"code": -1, "msg": "添加数据失败"})
 
@@ -388,8 +401,8 @@ def obesity_test():
         ...
        }
     """
-    # "user_id": session["user_id"],
-    user_id = "5a30d3694aee3086ea6d7c29",
+    user_id = session["user_id"]
+    # user_id = "5a30d3694aee3086ea6d7c29",
     weight = request.form.get("weight")
     heights = request.form.get("height")
     if weight and heights:
@@ -411,7 +424,7 @@ def obesity_test():
             standard = "中度肥胖"
         elif Result >= 35:
             standard = "重度肥胖"
-        update = DB.users.update_one({"_id": "5a30d3694aee3086ea6d7c29"}, {"$set": {"assessment": standard}})
+        update = DB.users.update_one({"_id": user_id}, {"$set": {"assessment": standard}})
         if update.matched_count > 0:
             return jsonify({"assessment": standard, "weight": int(request.form.get("weight"))})
         else:
@@ -426,29 +439,34 @@ def apply_free_consultation():
        @apiGroup U_用户_USER
        @apiVersion 1.0.0
        @apiPermission 访问授权
-       @apiParam {int} sex 性别
-       @apiParam {int} age 年龄
-       @apiParam {int} height 身高
-       @apiParam {double} weight 体重
-       @apiParam {str} sport 运动量
+       @apiParam {str} estimated_times 预计时间
+       @apiParam {float} apply_weight 申请减重[单位：kg]
+       @apiParam {str} name 姓名
+       @apiParam {str} phone 电话
        @apiSuccessExample {json} JSON.result 对象
        {
        }
     """
-    # "user_id": session["user_id"],
-    user_id = "5a30d3694aee3086ea6d7c29",
-    data = {
-        "sex": request.form.get("sex"),
-        "age": int(request.form.get("age")),
-        "height": int(request.form.get("height")),
-        "weight": float(request.form.get("double")),
-        "sport": request.form.get("sport")
-        }
-    update = DB.users.update_one({"_id": user_id}, {"$set": common.update_data(data)})
-    if update.matched_count > 0:
-        return jsonify({"code": 0, "msg": "数据编辑成功"})
+    user_id = session["user_id"]
+    # user_id = "5a30d3694aee3086ea6d7c29",
+    estimated_times = request.form.get("estimated_times")
+    apply_weight = request.form.get("apply_weight")
+    name = request.form.get("name")
+    phone = request.form.get("phone")
+    if estimated_times and apply_weight and name and phone:
+        data = {
+            "estimated_times": estimated_times,
+            "apply_weight": float(apply_weight),
+            "name": name,
+            "phone": phone
+            }
+        update = DB.users.update_one({"_id": user_id}, {"$set": data})
+        if update.matched_count > 0:
+            return jsonify({"code": 0, "msg": "数据编辑成功"})
+        else:
+            return jsonify({"code": -1, "msg": "数据编辑失败"})
     else:
-        return jsonify({"code": -1, "msg": "数据编辑失败"})
+        return jsonify({"code": -1001, "msg": "参数错误"})
 
 @model.route('/user/files_upload/',methods=['post'])
 def files_upload():
@@ -461,13 +479,27 @@ def files_upload():
        {
        }
     """
-    abpath = os.path.abspath('./upload/')
-    for upload in request.files.getlist("file"):
-        file_name = upload.filename.rsplit("/")[0]
-        destination = "/".join([abpath, file_name])
-        upload.save(str(destination))
-        result = {"file_name": file_name, "destination": destination}
-    return jsonify({"code": 0, "filename": result})
+    # files = request.files.getlist("file")
+
+    abpath = os.path.abspath('./app/static/upload/')
+    file_data = []
+    if os.path.isdir('./app/static/upload/') == False:
+        os.mkdir("./app/static/upload/")
+        for upload in request.files.getlist("file"):
+            file_name = upload.filename.rsplit("/")[0]
+            destination = "/".join([abpath, file_name])
+            upload.save(str(destination))
+            result = {"file_name": file_name, "destination": "upload/"+file_name}
+            file_data.append(result)
+        return jsonify({"code": 0, "filename": file_data})
+    else:
+        for upload in request.files.getlist("file"):
+            file_name = upload.filename.rsplit("/")[0]
+            destination = "/".join([abpath, file_name])
+            upload.save(destination)
+            result = {"file_name": file_name, "destination": "upload/"+file_name}
+            file_data.append(result)
+        return jsonify({"code": 0, "filename": file_data})
 
 @model.route('/user/update_user/', methods= ['post'])
 def update_user():
@@ -485,27 +517,47 @@ def update_user():
        {
        }
     """
-    # user_id = session["user_id"],
-    user_id = "5a30d3694aee3086ea6d7c29",
+    user_id = session["user_id"]
+    # user_id = "5a30d3694aee3086ea6d7c29",
+
     data = {
-        "sex": request.form.get("sex"),
+        "sex": request.form.get("sex") or "",
         "phone": request.form.get("phone") or "",
-        "height": request.form.get("height"),
-        "local_weight": int(request.form.get("local_weight")),
-        "local_waist": int(request.form.get("local_waist")),
-        "age": request.form.get("age"),
+        "height": request.form.get("height") or "",
+        "local_weight": request.form.get("local_weight") or "",
+        "local_waist": request.form.get("local_waist") or "",
+        "age": request.form.get("age") or "",
         "avatar": request.form.get("avatar") or "",
         "name": request.form.get("name") or "",
-        "address": request.form.get("address"),
+        "address": request.form.get("address") or ""
     }
-    datas = common.update_data(data)
-    updates = DB.users.update_one({"_id": "5a30d3694aee3086ea6d7c29"}, {"$set": datas})
+    for key in data.keys():
+        if data[key] == None or data[key] == "":
+            del(data[key])
+    datas = data
+    updates = DB.users.update_one({"_id": user_id}, {"$set": datas})
     if updates.matched_count > 0:
         return jsonify({"code": 0, "msg": "数据编辑成功"})
     else:
         return jsonify({"code": -1, "msg": "数据编辑失败"})
 
 
+
+# @model.route("/user/not_founts")
+# def not_founts():
+#     if "user_id" in session:
+#         user_id = session["user_id"]
+#         if user_id == None:
+#             return render_template("not_found.html")
+#         else:
+#             user_info = DB.users.find_one({"_id": user_id})
+#             if user_info != None:
+#                 if user_info["type"] == 1:
+#                     return render_template("index/index_admin.html")
+#                 else:
+#                     return render_template("index/index.html")
+#     else:
+#         return render_template("not_found.html")
 # @model.route('/user/update_date/', methods= ['post'])
 # def uodate_data():
 #     data = {
@@ -520,5 +572,12 @@ def update_user():
 #             if data[key].__len__() == 0:
 #                 del(data[key])
 #     return jsonify(data)
+
+
+@model.route('/a')
+def uodate_data():
+    return render_template("upload.html")
+
+
 
 

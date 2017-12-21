@@ -1,1 +1,1 @@
-from auth import requery_auth
+from auth import requery_auth,requires_login
