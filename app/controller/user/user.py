@@ -137,7 +137,7 @@ def dietetic_daily():
        {
        }
     """
-    user_id = session["user_id"],
+    user_id = session["user_id"]
     # user_id = "5a30d3694aee3086ea6d7c29"
     type = int(request.form.get("type"))
     if type == None or (type >= 3):
@@ -543,21 +543,21 @@ def update_user():
 
 
 
-@model.route("/user/not_founts")
-def not_founts():
-    if "user_id" in session:
-        user_id = session["user_id"]
-        if user_id == None:
-            return render_template("not_found.html")
-        else:
-            user_info = DB.users.find_one({"_id": user_id})
-            if user_info != None:
-                if user_info["type"] == 1:
-                    return render_template("index/index_admin.html")
-                else:
-                    return render_template("index/index.html")
-    else:
-        return render_template("not_found.html")
+# @model.route("/user/not_founts")
+# def not_founts():
+#     if "user_id" in session:
+#         user_id = session["user_id"]
+#         if user_id == None:
+#             return render_template("not_found.html")
+#         else:
+#             user_info = DB.users.find_one({"_id": user_id})
+#             if user_info != None:
+#                 if user_info["type"] == 1:
+#                     return render_template("index/index_admin.html")
+#                 else:
+#                     return render_template("index/index.html")
+#     else:
+#         return render_template("not_found.html")
 # @model.route('/user/update_date/', methods= ['post'])
 # def uodate_data():
 #     data = {
