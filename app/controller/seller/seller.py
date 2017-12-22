@@ -267,7 +267,7 @@ def sell_dietetic_daily(user_id):
 
 
 @model.route('/seller/sell_comprehensive_daily/<string:user_id>/')
-@requires_login
+# @requires_login
 def sell_comprehensive_daily(user_id):
     """
        @api {GET} /seller/sell_comprehensive_daily/<user_id>/ 10. 获取用户综合日报列表信息
@@ -301,7 +301,7 @@ def sell_comprehensive_daily(user_id):
             com['_id'] = comprehen['_id']
             com['weight'] = comprehen['weight']
             if "weight" in comprehen and "weight" in user:
-                com['arrange_weight'] = comprehen['weight'] - user['weight']
+                com['arrange_weight'] = user['weight'] - comprehen['weight']
             else:
                 com['arrange_weight'] = float(0)
             com['timed'] = comprehen['timed']
@@ -309,7 +309,7 @@ def sell_comprehensive_daily(user_id):
         arrange_weight = float(0)
         if user:
             if ("weight" in user) and ("local_weight" in user):
-                arrange_weight = user['local_weight'] - user['weight']
+                arrange_weight = user['weight'] - user['local_weight']
                 result = {"local_weight": user['local_weight'], "arrange_weight": arrange_weight, "today_weight": user['weight'], "comprehensive": lists}
         else:
             result = {"local_weight": float(0), "arrange_weight": arrange_weight, "today_weight": float(0), "comprehensive": lists}
