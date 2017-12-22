@@ -360,7 +360,7 @@ def add_comprehensive_daily():
     # 通过当天时间戳查询数据库
     times = int(time.strftime('%Y%m%d', time.localtime(time.time())))
     user_id = session["user_id"]
-    # user_id = "5a30d3694aee3086ea6d7c29"
+    # user_id = "5a3a2d504aee300b032c897e"
     images_list = []
     images = request.form.getlist("images")
     if images.__len__() > 0:
@@ -377,9 +377,9 @@ def add_comprehensive_daily():
         "waist": float(request.form.get("waist")) or float(0),
         "images": images_list,
         "timed": int(time.time()),
-        "day": time
+        "day": times
     }
-    find_one = DB.comprehensive_daily.find_one({"user_id": user_id, "day": time})
+    find_one = DB.comprehensive_daily.find_one({"user_id": user_id, "day": times})
     if find_one == None:
         insert_one = DB.comprehensive_daily.insert_one(data)
         if insert_one.inserted_id:
@@ -392,15 +392,20 @@ def add_comprehensive_daily():
         else:
             return jsonify({"code": -1, "msg": "添加数据失败"})
     else:
-        for key in data.keys():
-            if data[key] == None or data[key] == "":
-                del (data[key])
-        datas = data
-        update_one = DB.comprehensive_daily.update_one({"_id": find_one["_id"]}, {"$set": datas})
+        ids = find_one["_id"]
+        dataa = {
+            "weight": float(request.form.get("weight")) or float(0),
+            "waist": float(request.form.get("waist")) or float(0),
+            "images": images_list,
+        }
+        for key in dataa.keys():
+            if dataa[key] == None or dataa[key] == "":
+                del (dataa[key])
+        datas = dataa
+        update_one = DB.comprehensive_daily.update_one({"_id": ids}, {"$set": datas})
         if update_one.matched_count > 0:
             # 更新用户表
-            update = DB.users.update_one({"_id": user_id},
-                                         {"$set": {"weight": float(request.form.get("weight")) or float(0)}})
+            update = DB.users.update_one({"_id": user_id},{"$set": {"weight": float(request.form.get("weight")) or float(0)}})
             if update.matched_count > 0:
                 return jsonify({"code": 0, "msg": "添加数据成功"})
             else:
@@ -553,7 +558,6 @@ def update_user():
         "phone": request.form.get("phone") or "",
         "height": int(request.form.get("height")) or "",
         "local_weight": float(request.form.get("local_weight")) or "",
-        "local_waist": float(request.form.get("local_waist")) or "",
         "age": int(request.form.get("age")) or "",
         "avatar": request.form.get("avatar") or "",
         "name": request.form.get("name") or "",
