@@ -58,9 +58,37 @@ def user_info():
     """
     try:
         user_id = session["user_id"]
-        # user_id = "5a30d3694aee3086ea6d7c29"
+        # user_id = "5a3a2d504aee300b032c897e"
         find = users.find_one({"_id": user_id, "status": 0, "type": 0})
-        return common.find(find=find)
+        if find == None:
+            find["new_assessment"] = ""
+            return common.find(find=find)
+        else:
+            weight = find["weight"]
+            height = find["height"]
+            if weight == float(0) or height == float(0):
+                find["new_assessment"] = ""
+                return common.find(find=find)
+            else:
+                heights = float(height) / float(100)
+                num = float(heights) * float(heights)
+                Result = float(weight) / num
+                if Result < 18.5:
+                    standard = "营养不良"
+                elif Result > 18.5 and Result < 23.9999:
+                    standard = "正常体重"
+                elif Result >= 24 and Result <= 26:
+                    standard = "超重"
+                elif Result > 26 and Result < 28:
+                    standard = "超重,肥胖"
+                elif Result > 28 and Result < 30:
+                    standard = "轻度肥胖"
+                elif Result > 30 and Result < 35:
+                    standard = "中度肥胖"
+                elif Result >= 35:
+                    standard = "重度肥胖"
+                find["new_assessment"] = standard
+                return common.find(find=find)
     except BaseException:
         return common.find(code=-1)
 
@@ -425,7 +453,7 @@ def obesity_test():
        @apiParam {int} sex 性别
        @apiParam {int} age 年龄
        @apiParam {int} height 身高
-       @apiParam {double} weight 体重
+       @apiParam {double} local_weight 体重
        @apiParam {str} sport 运动量
        @apiSuccessExample {json} JSON.result 对象
        {
@@ -434,7 +462,7 @@ def obesity_test():
     """
     user_id = session["user_id"]
     # user_id = "5a30d3694aee3086ea6d7c29"
-    weight = request.form.get("weight")
+    weight = request.form.get("local_weight")
     heights = request.form.get("height")
     sport = request.form.get("sport") or ""
     if weight and heights:
@@ -458,13 +486,13 @@ def obesity_test():
             standard = "重度肥胖"
         update = DB.users.update_one({"_id": user_id}, {"$set": {"assessment": standard, "sport": sport}})
         if update.matched_count > 0:
-            return jsonify({"assessment": standard, "weight": float(request.form.get("weight"))})
+            return jsonify({"assessment": standard, "local_weight": float(request.form.get("local_weight"))})
         else:
             return jsonify({"code": -1, "msg": "操作失败"})
     else:
         return jsonify({"code": -1001, "msg": "参数错误"})
 
-@model.route('/user/apply_free_consultation/',methods=['post'])
+@model.route('/user/apply_free_consultation/', methods=['post'])
 def apply_free_consultation():
     """
        @api {POST} /user/apply_free_consultation/ 010. 申请免费咨询
@@ -557,7 +585,7 @@ def update_user():
         "sex": int(request.form.get("sex")) or "",
         "phone": request.form.get("phone") or "",
         "height": int(request.form.get("height")) or "",
-        "local_weight": float(request.form.get("local_weight")) or "",
+        "weight": float(request.form.get("weight")) or "",
         "age": int(request.form.get("age")) or "",
         "avatar": request.form.get("avatar") or "",
         "name": request.form.get("name") or "",
