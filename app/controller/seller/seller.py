@@ -301,7 +301,7 @@ def sell_comprehensive_daily(user_id):
             com['_id'] = comprehen['_id']
             com['weight'] = comprehen['weight']
             if "weight" in comprehen and "weight" in user:
-                com['arrange_weight'] = user['weight'] - comprehen['weight']
+                com['arrange_weight'] = comprehen['weight'] - user['local_weight']
             else:
                 com['arrange_weight'] = float(0)
             com['timed'] = comprehen['timed']
