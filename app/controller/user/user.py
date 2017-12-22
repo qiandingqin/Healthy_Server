@@ -57,8 +57,8 @@ def user_info():
         }
     """
     try:
-        user_id = session["user_id"]
-        # user_id = str("5a3b562e07f58413a3deca45")
+        # user_id = session["user_id"]
+        user_id = "5a30d3694aee3086ea6d7c29"
         find = users.find_one({"_id": user_id, "status": 0, "type": 0})
         return common.find(find=find)
     except BaseException:
@@ -88,9 +88,9 @@ def today_recipes():
         next_start = int(request.args.get('next_start'))*10
     else:
         return jsonify({"code": -10001, "mag": "参数错误"})
-    user_id = session["user_id"]
-    # user_id = "5a30d3694aee3086ea6d7c29"
-    find_all = recipes.find({"user_id": "5a30d3694aee3086ea6d7c29"}).skip(next_start).limit(10).sort("day", pymongo.ASCENDING)
+    # user_id = session["user_id"]
+    user_id = "5a30d3694aee3086ea6d7c29"
+    find_all = recipes.find({"user_id": user_id}).skip(next_start).limit(10).sort("day", pymongo.ASCENDING)
     return common.findAll(find_all)
 
 
@@ -137,8 +137,8 @@ def dietetic_daily():
        {
        }
     """
-    user_id = session["user_id"]
-    # user_id = "5a30d3694aee3086ea6d7c29"
+    # user_id = session["user_id"]
+    user_id = "5a30d3694aee3086ea6d7c29"
     type = int(request.form.get("type"))
     if type == None or (type >= 3):
         return jsonify({"code": -1001, "msg": "用餐类别异常"})
@@ -283,7 +283,8 @@ def user_comprehensive_daily():
         next_start = int(request.args.get('next_start'))*10
     else:
         return "参数错误"
-    user_id = session["user_id"]
+    # user_id = session["user_id"]
+    user_id = "5a30d3694aee3086ea6d7c29"
     find_all = DB.comprehensive_daily.find({"user_id": user_id}).skip(next_start).limit(10).sort("timed", pymongo.DESCENDING)
     data = []
     if find_all:
@@ -353,7 +354,8 @@ def add_comprehensive_daily():
        }
     """
     images = ""
-    user_id = session["user_id"]
+    # user_id = session["user_id"]
+    user_id = "5a30d3694aee3086ea6d7c29"
     images_list = []
     images = request.form.getlist("images")
     if images.__len__() > 0:
@@ -365,7 +367,6 @@ def add_comprehensive_daily():
         images_list.append(imgs)
     data = {
         "_id": bson.objectid.ObjectId().__str__(),
-        # "user_id": session["user_id"],
         "user_id": user_id,
         "weight": float(request.form.get("weight")) or float(0),
         "waist": float(request.form.get("waist")) or float(0),
@@ -402,14 +403,14 @@ def obesity_test():
        }
     """
     user_id = session["user_id"]
-    # user_id = "5a30d3694aee3086ea6d7c29",
+    # user_id = "5a30d3694aee3086ea6d7c29"
     weight = request.form.get("weight")
     heights = request.form.get("height")
     if weight and heights:
         # 计算
         height = float(heights) / float(100)
         num = float(height) * float(height)
-        Result = int(weight) / num
+        Result = float(weight) / num
         if Result < 18.5:
             standard = "营养不良"
         elif Result > 18.5 and Result < 23.9:
@@ -426,7 +427,7 @@ def obesity_test():
             standard = "重度肥胖"
         update = DB.users.update_one({"_id": user_id}, {"$set": {"assessment": standard}})
         if update.matched_count > 0:
-            return jsonify({"assessment": standard, "weight": int(request.form.get("weight"))})
+            return jsonify({"assessment": standard, "weight": float(request.form.get("weight"))})
         else:
             return jsonify({"code": -1, "msg": "操作失败"})
     else:
@@ -447,8 +448,8 @@ def apply_free_consultation():
        {
        }
     """
-    user_id = session["user_id"]
-    # user_id = "5a30d3694aee3086ea6d7c29",
+    # user_id = session["user_id"]
+    user_id = "5a30d3694aee3086ea6d7c29"
     estimated_times = request.form.get("estimated_times")
     apply_weight = request.form.get("apply_weight")
     name = request.form.get("name")
