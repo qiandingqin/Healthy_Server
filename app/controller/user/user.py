@@ -348,14 +348,19 @@ def add_comprehensive_daily():
        @apiPermission 访问授权
        @apiParam {double} weight 体重
        @apiParam {double} waist 腰围
+       @apiParam {Long} day  #时间戳，按天算
        @apiParam {list} images 运动量图片2
        @apiSuccessExample {json} JSON.result 对象
        {
        }
     """
+
     images = ""
+
+    # 通过当天时间戳查询数据库
+    times = int(time.strftime('%Y%m%d', time.localtime(time.time())))
     user_id = session["user_id"]
-    # user_id = "5a30d3694aee3086ea6d7c29"
+    # user_id = "5a3a2d504aee300b032c897e"
     images_list = []
     images = request.form.getlist("images")
     if images.__len__() > 0:
@@ -370,19 +375,44 @@ def add_comprehensive_daily():
         "user_id": user_id,
         "weight": float(request.form.get("weight")) or float(0),
         "waist": float(request.form.get("waist")) or float(0),
-        "images":images_list,
-        "timed": int(time.time())
+        "images": images_list,
+        "timed": int(time.time()),
+        "day": times
     }
-    insert_one = DB.comprehensive_daily.insert_one(data)
-    if insert_one.inserted_id:
-        # 更新用户表
-        update = DB.users.update_one({"_id": user_id}, {"$set": {"weight": float(request.form.get("weight")) or float(0)}})
-        if update.matched_count > 0:
-            return jsonify({"code": 0, "msg": "添加数据成功"})
+    find_one = DB.comprehensive_daily.find_one({"user_id": user_id, "day": times})
+    if find_one == None:
+        insert_one = DB.comprehensive_daily.insert_one(data)
+        if insert_one.inserted_id:
+            # 更新用户表
+            update = DB.users.update_one({"_id": user_id}, {"$set": {"weight": float(request.form.get("weight")) or float(0)}})
+            if update.matched_count > 0:
+                return jsonify({"code": 0, "msg": "添加数据成功"})
+            else:
+                return jsonify({"code": -1, "msg": "添加数据失败"})
         else:
             return jsonify({"code": -1, "msg": "添加数据失败"})
     else:
-        return jsonify({"code": -1, "msg": "添加数据失败"})
+        ids = find_one["_id"]
+        dataa = {
+            "weight": float(request.form.get("weight")) or float(0),
+            "waist": float(request.form.get("waist")) or float(0),
+            "images": images_list,
+        }
+        for key in dataa.keys():
+            if dataa[key] == None or dataa[key] == "":
+                del (dataa[key])
+        datas = dataa
+        update_one = DB.comprehensive_daily.update_one({"_id": ids}, {"$set": datas})
+        if update_one.matched_count > 0:
+            # 更新用户表
+            update = DB.users.update_one({"_id": user_id},{"$set": {"weight": float(request.form.get("weight")) or float(0)}})
+            if update.matched_count > 0:
+                return jsonify({"code": 0, "msg": "添加数据成功"})
+            else:
+                return jsonify({"code": -1, "msg": "添加数据失败"})
+        else:
+            return jsonify({"code": -1, "msg": "添加数据失败"})
+
 
 
 @model.route('/user/obesity_test/', methods=['post'])
@@ -524,12 +554,11 @@ def update_user():
     # user_id = "5a30d3694aee3086ea6d7c29",
 
     data = {
-        "sex": request.form.get("sex") or "",
+        "sex": int(request.form.get("sex")) or "",
         "phone": request.form.get("phone") or "",
-        "height": request.form.get("height") or "",
-        "local_weight": request.form.get("local_weight") or "",
-        "local_waist": request.form.get("local_waist") or "",
-        "age": request.form.get("age") or "",
+        "height": int(request.form.get("height")) or "",
+        "local_weight": float(request.form.get("local_weight")) or "",
+        "age": int(request.form.get("age")) or "",
         "avatar": request.form.get("avatar") or "",
         "name": request.form.get("name") or "",
         "address": request.form.get("address") or ""
