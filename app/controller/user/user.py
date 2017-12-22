@@ -486,7 +486,7 @@ def obesity_test():
             standard = "重度肥胖"
         update = DB.users.update_one({"_id": user_id}, {"$set": {"assessment": standard, "sport": sport}})
         if update.matched_count > 0:
-            return jsonify({"assessment": standard, "local_weight": float(request.form.get("local_weight"))})
+            return jsonify({"assessment": standard, "local_weight": float(request.form.get("local_weight")), "weight": float(request.form.get("local_weight"))})
         else:
             return jsonify({"code": -1, "msg": "操作失败"})
     else:
