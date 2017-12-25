@@ -580,13 +580,12 @@ def update_user():
     """
     user_id = session["user_id"]
     # user_id = "5a30d3694aee3086ea6d7c29",
-
     data = {
-        "sex": int(request.form.get("sex")) or "",
+        "sex": request.form.get("sex") and int(request.form.get("sex")) or "",
         "phone": request.form.get("phone") or "",
-        "height": int(request.form.get("height")) or "",
-        "weight": float(request.form.get("weight")) or "",
-        "age": int(request.form.get("age")) or "",
+        "height": request.form.get("height") and int(request.form.get("height")) or "",
+        "weight": request.form.get("weight") and float(request.form.get("weight")) or "",
+        "age": request.form.get("age") and int(request.form.get("age")) or "",
         "avatar": request.form.get("avatar") or "",
         "name": request.form.get("name") or "",
         "address": request.form.get("address") or ""

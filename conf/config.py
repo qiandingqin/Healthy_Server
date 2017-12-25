@@ -9,7 +9,7 @@ template_path = os.path.join(os.path.dirname(__file__), "templates")
 static_path = os.path.join(os.path.dirname(__file__), "static")
 
 # 连接数据库
-client = pymongo.MongoClient('192.168.6.111', 27017)
+client = pymongo.MongoClient('192.168.6.111', 27018)
 DB = client.lose_weight
 DB.authenticate("lose_weight", "lose_weight")
 # 数据表部分
